@@ -1,0 +1,44 @@
+
+.oval-bottom {
+    position: fixed;
+    top: 50%;
+    left: -25%;
+    width: 75vmin;
+    height: 75vmin;
+    background: #002d574d;
+    border-radius: 50%;
+  }
+  
+  .oval-top {
+    position: fixed;
+    top: -40%;
+    left: 80%;
+    width: 85vmin;
+    height: 85vmin;
+    background: #002d574d;
+    border-radius: 50%;
+  }
+  
+  @media screen and (max-width: 1230px) {
+    .oval-bottom {
+      top: 56%;
+      left: -33%;
+    }
+  }
+  
+  @media screen and (max-width: 580px) {
+    .oval-bottom {
+      top: 70%;
+      left: -50%;
+      width: 100vmin;
+      height: 100vmin;
+    }
+  
+    .oval-top {
+      top: -25%;
+      left: 60%;
+      width: 100vmin;
+      height: 100vmin;
+    }
+  }
+  
