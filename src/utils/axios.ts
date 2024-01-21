@@ -2,15 +2,17 @@ import axios from 'axios';
 
 import { getLocalStorage } from './localStorage';
 
-const backend_url = 'http://localhost:4000';
+const backend_url = 'https://dev-authmanager-api.azurewebsites.net/api';
 
 const authHeader = () => {
   const user = getLocalStorage('user');
-
+  const appKey = '03C2DB97-DD4D-4998-A6F7-4C88E54199B8'
   if (user && user.token) {
-    return { Authorization: 'Bearer ' + user.token };
+    return { 'FR-APP': appKey,Authorization: 'Bearer ' + user.token };
   } else {
-    return {};
+    return {
+      'FR-APP': appKey,
+    };
   }
 };
 

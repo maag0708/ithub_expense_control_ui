@@ -16,3 +16,13 @@ export const isTokenExpired = (token: string) => {
   const exp = new Date(parsedToken.exp * 1000);
   return exp < new Date();
 };
+
+export const decodeToken = (token: string) => {
+  const parsedToken = parseJwt(token);
+
+  if (!parsedToken) {
+    return null;
+  }
+
+  return parsedToken;
+}

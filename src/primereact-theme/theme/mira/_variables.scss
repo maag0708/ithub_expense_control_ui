@@ -20,17 +20,17 @@ $colors: (
     "primary": $primaryColor
 ) !default;
 
-$infoColor: #639BB2 !default;
-$infoLightColor: #88C0D0 !default;
+$infoColor: #ffffff !default;
+$infoLightColor: #90d6e9 !default;
 $successColor: #7FA366 !default;
-$successLightColor: #A3BE8C !default;
+$successLightColor: #87e435 !default;
 $warningColor: #D08770 !default;
-$warningLightColor: #E2AC94 !default;
+$warningLightColor: #e2c194 !default;
 $helpColor: #9A6796 !default;
 $helpLightColor: #B48EAD !default;
 $dangerColor: #BF616A !default;
 $dangerLightColor: #D88889 !default;
-$yellowColor: #EBCB8B !default;
+$yellowColor: #002d5778 !default;
 
 $black50: #707888 !default;
 $black100: #4C566A !default;
@@ -488,8 +488,8 @@ $paginatorElementPadding:0 !default;
 //table
 $tableHeaderBorder:1px solid $white !default;
 $tableHeaderBorderWidth:1px 0 1px 0 !default;
-$tableHeaderBg:$white !default;
-$tableHeaderTextColor:$black100 !default;
+$tableHeaderBg:$primaryColor !default;
+$tableHeaderTextColor:$white !default;
 $tableHeaderFontWeight:600 !default;
 $tableHeaderPadding:1rem 1rem !default;
 
@@ -597,7 +597,7 @@ $toastDetailMargin:$inlineSpacing 0 0 0 !default;
 //severities
 $infoMessageBg:scale-color($infoLightColor, $lightness: +40%) !default;
 $infoMessageBorder:solid scale-color($infoColor, $lightness: -50%) !default;
-$infoMessageTextColor:scale-color($infoColor, $lightness: -50%) !default;
+$infoMessageTextColor:scale-color($black100, $lightness: -50%) !default;
 $infoMessageIconColor:scale-color($infoColor, $lightness: -75%) !default;
 $successMessageBg:scale-color($successLightColor, $lightness: +40%) !default;
 $successMessageBorder:solid scale-color($successColor, $lightness: -50%) !default;

@@ -3,9 +3,9 @@ import Layout from "../components/layout/Layout";
 
 const HomePage: React.FC = () => {
   return (
-   <Layout>
-    <>Hola mundo</>
-   </Layout>
+    <Layout title="Inicio">
+      <>Hello world from home</>
+    </Layout>
   );
 };
 

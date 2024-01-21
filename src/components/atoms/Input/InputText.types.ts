@@ -15,5 +15,7 @@ export interface InputProps {
   icon?: string;
   touched?: boolean;
   error?: string;
-  style?: string;
+  className?: string;
+  required?: boolean;
+  autoFocus?: boolean;
 }

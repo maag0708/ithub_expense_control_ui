@@ -1,31 +1,43 @@
+import { Avatar } from "primereact/avatar";
+import { Button } from "primereact/button";
 import React from "react";
-import { LayoutProps } from "./Layout.types";
+import { useNavigate } from "react-router-dom";
+import { MenuBarItem } from "../../types/menubar";
+import { SidebarItemModel } from "../../types/sidebar";
+import Alert from "../atoms/Alert/Alert";
 import MenuBar from "../atoms/MenuBar/MenuBar";
 import Sidebar from "../atoms/Sidebar/Sidebar";
-import SideBarItemRender from "../hocs/SideBarRender/SideBarRender";
-import { SidebarItem } from "../../types/sidebar";
-import { MenuBarItem } from "../../types/menubar";
-import { InputText } from "primereact/inputtext";
-import { Avatar } from "primereact/avatar";
+import MenuBarRender from "../molecules/Layout/MenuBarRender/MenuBarRender";
+import SideBarItemRender from "../molecules/Layout/SideBarRender/SideBarRender";
+import { LayoutProps } from "./Layout.types";
+import { Badge } from "primereact/badge";
+import { removeLocalStorage } from "../../utils/localStorage";
 
-const Layout: React.FC<LayoutProps> = ({ children }) => {
-  const items: SidebarItem[] = [
+const Layout: React.FC<LayoutProps> = ({ header, title, children, back }) => {
+  const navigate = useNavigate();
+
+  const items: SidebarItemModel[] = [
     {
+      label: "Dashboard",
+      className: "text-primary bg-blue-50 active",
       items: [
         {
-          label: "Settings",
-          icon: "pi pi-cog",
+          label: "Inicio",
+          icon: "pi pi-fw pi-home",
           template: SideBarItemRender,
+          url: "/",
         },
         {
-          label: "Messages",
-          icon: "pi pi-inbox",
+          label: "Facturas",
+          icon: "pi pi-fw pi-file",
           template: SideBarItemRender,
+          url: "/invoices",
         },
         {
-          label: "Logout",
-          icon: "pi pi-sign-out",
+          label: "Servicios",
+          icon: "pi pi-fw pi-file",
           template: SideBarItemRender,
+          url: "/services",
         },
       ],
     },
@@ -33,12 +45,22 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
 
   const itemsMenuBar: MenuBarItem[] = [
     {
-      label: "Home",
-      icon: "pi pi-home",
+      label: "Dashboard",
+      icon: "pi pi-fw pi-home",
+      template: MenuBarRender,
+      url: "/",
     },
     {
-      label: "Features",
-      icon: "pi pi-star",
+      label: "Facturas",
+      icon: "pi pi-fw pi-file",
+      template: SideBarItemRender,
+      url: "/invoices",
+    },
+    {
+      label: "Servicios",
+      icon: "pi pi-fw pi-file",
+      template: SideBarItemRender,
+      url: "/services",
     },
   ];
 
@@ -46,31 +68,59 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
     <img
       alt="logo"
       src="https://primefaces.org/cdn/primereact/images/logo.png"
-      height="40"
+      height="60"
       className="mr-2"
     ></img>
   );
-  
+
+  const handleLogout = () => {
+    removeLocalStorage('user');
+    window.location.href = '/';
+  };
+
   const end = (
-    <div className="flex align-items-center gap-2">
-      <InputText
-        placeholder="Search"
-        type="text"
-        className="w-8rem sm:w-auto"
-      />
-      <Avatar
-        image="https://primefaces.org/cdn/primevue/images/avatar/amyelsner.png"
-        shape="circle"
+    <div className="p-menuitem-content">
+      <Button
+        icon="pi pi-sign-out"
+        raised
+        text
+        className="p-button-rounded p-mr-2"
+        onClick={handleLogout}
       />
     </div>
   );
 
   return (
-    <div className="flex flex-column h-screen">
+    <div className="flex flex-column h-screen w-screen bg-blue-50">
+      <Alert />
       <MenuBar items={itemsMenuBar} start={start} end={end} />
-      <div className="flex flex-row h-full">
+      <div className="flex flex-row h-full w-screen">
         <Sidebar items={items} />
-        <div className="w-full m-2">{children}</div>
+        <div className="flex-1 overflow-auto lg:overflow-hidden m-3">
+          <div className="flex flex-column justify-between h-full max-h-full">
+            <div className="flex flex-column md:flex-row justify-content-between px-0 md:px-5">
+              <div className="w-full flex flex-row justify-content-start align-items-center gap-3 ">
+                {back && (
+                  <Button
+                    icon="pi pi-arrow-left"
+                    text
+                    className="p-button-rounded p-mr-2"
+                    onClick={() => navigate(back)}
+                  />
+                )}
+                <h1 className="text-xl md:text-3xl font-normal text-primary text-center md:text-left my-4">
+                  {title}
+                </h1>
+              </div>
+              <div className="w-full flex flex-column md:flex-row align-items-center justify-content-end">
+                {header}
+              </div>
+            </div>
+            <div className="flex flex-column px-0 md:px-5 gap-2 h-full">
+              {children}
+            </div>
+          </div>
+        </div>
       </div>
     </div>
   );

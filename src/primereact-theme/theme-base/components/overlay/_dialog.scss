@@ -2,6 +2,12 @@
     border-radius: $borderRadius;
     box-shadow: $overlayContainerShadow;
     border: $overlayContentBorder;
+    background-color: $white;
+    width: auto;
+    height: auto;
+    display: flex;
+    justify-content: center;
+    align-items: center;
 
     .p-dialog-header {
         border-bottom: $dialogHeaderBorder;
@@ -10,7 +16,7 @@
         padding: $dialogHeaderPadding;
         border-top-right-radius: $borderRadius;
         border-top-left-radius: $borderRadius;
-
+  
         .p-dialog-title {
             font-weight: $dialogHeaderFontWeight;
             font-size: $dialogHeaderFontSize;

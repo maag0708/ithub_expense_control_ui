@@ -1,6 +1,7 @@
 export interface Notification {
-  notificationType: AlertType | undefined;
+  severity: AlertType;
+  summary: string;
   message: string;
 }
 
-export type AlertType = 'success' | 'error' | 'info' | 'warning';
+export type AlertType = 'success' | 'error' | 'info' | 'warn' | undefined;

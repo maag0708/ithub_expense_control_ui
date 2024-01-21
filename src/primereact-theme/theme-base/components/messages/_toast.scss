@@ -5,11 +5,10 @@
         margin: $toastMargin;
         box-shadow: $toastShadow;
         border-radius: $borderRadius;
-
         .p-toast-message-content {
             padding: $toastPadding;
             border-width: $toastBorderWidth;
-
+            align-items: center;
             .p-toast-message-text {
                 margin: $toastMessageTextMargin;
             }

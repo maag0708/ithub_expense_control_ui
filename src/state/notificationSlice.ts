@@ -1,11 +1,11 @@
 import { createSlice } from '@reduxjs/toolkit';
-
-import { Notification } from '../../../FROMA_BGT_UI/src/types/notification';
 import { RootState } from './store';
+import { Notification } from '../types/notification';
 
 export const initialState: Notification = {
-  notificationType: undefined,
+  severity: undefined,
   message: '',
+  summary: '',
 };
 
 const notificationSlice = createSlice({

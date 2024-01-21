@@ -1,15 +1,16 @@
 import { MenuItem, MenuItemOptions } from "primereact/menuitem";
 
-export interface SidebarItem extends MenuItem {
+export interface SidebarItemModel extends MenuItem{
   label?: string;
   items: MenuItemModel[];
 }
 
-interface MenuItemModel {
+export interface MenuItemModel {
   icon?: string;
   badge?: number;
   shortcut?: string;
   label: string;
+  url: string;
   template?:
     | React.ReactNode
     | ((item: MenuItem, options: MenuItemOptions) => React.ReactNode);

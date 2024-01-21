@@ -11,20 +11,22 @@ const Input: React.FC<InputProps> = ({
   type,
   value,
   disabled,
+  required,
   handleChange,
   handleBlur,
   iconPosition = "left",
   icon,
   touched,
   error,
+  autoFocus,
   size = "medium",
-  style
+  className,
 }) => {
   return (
-    <div className="flex flex-column gap-1">
+    <div className={`${className} flex flex-column`}>
       <span
-        className={`p-float-label flex flex-column ${
-          icon && `p-input-icon-${iconPosition}`
+        className={`p-float-label ${
+          icon != undefined ? `p-input-icon-${iconPosition}` : ""
         }`}
       >
         {icon && <i className={icon}></i>}
@@ -32,23 +34,27 @@ const Input: React.FC<InputProps> = ({
           id={name}
           name={name}
           type={type}
+          autoFocus={autoFocus}
+          required={required}
           placeholder={placeholder}
-          className={`${style} ${touched && error && "p-invalid"} ${
-            (size == "small" && "p-inputtext-sm") ||
-            (size == "medium" && "") ||
-            (size == "large" && "p-inputtext-lg")
+          className={`w-full ${touched && error ? "p-invalid" : ""} ${
+            (size == "small" ? "p-inputtext-sm" : "") ||
+            (size == "medium" ? "" : "") ||
+            (size == "large" ? "p-inputtext-lg" : "")
           }`}
           value={value}
           disabled={disabled}
           onChange={handleChange}
           onBlur={handleBlur}
         />
-        <label className="text-sm font-semibold" htmlFor={name}>{label ? label : name}</label>
+        <label className="text-sm font-semibold" htmlFor={name}>
+          {label ? label : name}
+        </label>
       </span>
       {touched && error ? (
-        <small id={name} className="text-left p-error">
+        <span id={name} className="text-left p-error text-sm">
           {error}
-        </small>
+        </span>
       ) : null}
     </div>
   );

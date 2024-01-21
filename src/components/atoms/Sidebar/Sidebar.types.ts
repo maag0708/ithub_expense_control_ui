@@ -1,5 +1,5 @@
-import { SidebarItem } from "../../../types/sidebar";
+import { SidebarItemModel } from "../../../types/sidebar";
 
 export interface SidebarProps {
-    items: SidebarItem[];
+    items: SidebarItemModel[];
 }
