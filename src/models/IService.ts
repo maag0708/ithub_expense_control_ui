@@ -1,5 +1,5 @@
 export interface IService {
-    id: number;
+    id?: number;
     serviceDate: string;
     invoiceNumber: string;
     month: string;

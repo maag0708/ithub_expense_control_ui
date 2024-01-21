@@ -42,7 +42,7 @@ const LoginForm: React.FC<LoginFormProps> = () => {
         );
         const user = decodeToken(response.token)
         setLocalStorage("user", user);
-        navigate("/");
+        navigate("/invoices");
       })
       .catch((error) => {
         dispatch(

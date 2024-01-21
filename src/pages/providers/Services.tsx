@@ -4,7 +4,8 @@ import Layout from "../../components/layout/Layout";
 import ServiceHeader from "../../components/molecules/Services/ServiceHeader/ServiceHeader";
 import ServiceTable from "../../components/molecules/Services/ServiceTable/ServiceTable";
 import { IService } from "../../models/IService";
-import { addService, getAllServices } from "../../services/services.service";
+import { getAllServices } from "../../services/services.service";
+import { exportToXLSX } from "../../services/xlsx.service";
 
 const ServicePage = () => {
   const navigate = useNavigate();
@@ -13,6 +14,8 @@ const ServicePage = () => {
 
   const exportData = () => {
     console.log("Export data");
+    console.log(services);
+    exportToXLSX(services, "Servicios");
   };
 
   const createService = () => {

@@ -1,17 +1,14 @@
-import { Avatar } from "primereact/avatar";
 import { Button } from "primereact/button";
 import React from "react";
 import { useNavigate } from "react-router-dom";
 import { MenuBarItem } from "../../types/menubar";
 import { SidebarItemModel } from "../../types/sidebar";
+import { removeLocalStorage } from "../../utils/localStorage";
 import Alert from "../atoms/Alert/Alert";
 import MenuBar from "../atoms/MenuBar/MenuBar";
 import Sidebar from "../atoms/Sidebar/Sidebar";
-import MenuBarRender from "../molecules/Layout/MenuBarRender/MenuBarRender";
 import SideBarItemRender from "../molecules/Layout/SideBarRender/SideBarRender";
 import { LayoutProps } from "./Layout.types";
-import { Badge } from "primereact/badge";
-import { removeLocalStorage } from "../../utils/localStorage";
 
 const Layout: React.FC<LayoutProps> = ({ header, title, children, back }) => {
   const navigate = useNavigate();
@@ -22,12 +19,6 @@ const Layout: React.FC<LayoutProps> = ({ header, title, children, back }) => {
       className: "text-primary bg-blue-50 active",
       items: [
         {
-          label: "Inicio",
-          icon: "pi pi-fw pi-home",
-          template: SideBarItemRender,
-          url: "/",
-        },
-        {
           label: "Facturas",
           icon: "pi pi-fw pi-file",
           template: SideBarItemRender,
@@ -35,7 +26,7 @@ const Layout: React.FC<LayoutProps> = ({ header, title, children, back }) => {
         },
         {
           label: "Servicios",
-          icon: "pi pi-fw pi-file",
+          icon: "pi pi-fw pi-send",
           template: SideBarItemRender,
           url: "/services",
         },
@@ -45,12 +36,6 @@ const Layout: React.FC<LayoutProps> = ({ header, title, children, back }) => {
 
   const itemsMenuBar: MenuBarItem[] = [
     {
-      label: "Dashboard",
-      icon: "pi pi-fw pi-home",
-      template: MenuBarRender,
-      url: "/",
-    },
-    {
       label: "Facturas",
       icon: "pi pi-fw pi-file",
       template: SideBarItemRender,
@@ -58,7 +43,7 @@ const Layout: React.FC<LayoutProps> = ({ header, title, children, back }) => {
     },
     {
       label: "Servicios",
-      icon: "pi pi-fw pi-file",
+      icon: "pi pi-fw pi-send",
       template: SideBarItemRender,
       url: "/services",
     },
@@ -67,15 +52,15 @@ const Layout: React.FC<LayoutProps> = ({ header, title, children, back }) => {
   const start = (
     <img
       alt="logo"
-      src="https://primefaces.org/cdn/primereact/images/logo.png"
+      src="http://farmaciasroma.centralus.cloudapp.azure.com:8007/assets/images/roma_logo-1.png"
       height="60"
-      className="mr-2"
-    ></img>
+      className="mr-2 hidden md:block"
+    />
   );
 
   const handleLogout = () => {
-    removeLocalStorage('user');
-    window.location.href = '/';
+    removeLocalStorage("user");
+    window.location.href = "/login";
   };
 
   const end = (
@@ -112,7 +97,7 @@ const Layout: React.FC<LayoutProps> = ({ header, title, children, back }) => {
                   {title}
                 </h1>
               </div>
-              <div className="w-full flex flex-column md:flex-row align-items-center justify-content-end">
+              <div className="w-full flex flex-column md:flex-row align-items-center justify-content-end my-2">
                 {header}
               </div>
             </div>

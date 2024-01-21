@@ -166,120 +166,133 @@ const ServiceDetailForm: React.FC<ServiceDetailFormProps> = ({
   };
 
   return (
-    <Formik
-      initialValues={initialValues}
-      validationSchema={validationSchema}
-      validateOnMount={true}
-      onSubmit={onSubmit}
-      enableReinitialize={true}
-    >
-      {({ values, handleChange, handleBlur, errors, touched, isValid }) => (
-        <Form className={dynanicFormClassName}>
-          <Select
-            name="conceptID"
-            label="Concepto"
-            options={conceptCatalog}
-            handleChange={handleChange}
-            handleBlur={handleBlur}
-            value={values.conceptID}
-            error={errors.conceptID}
-            touched={touched.conceptID}
-            className={"my-3 col-12"}
-          />
+    <>
+      {invoiceNumber === undefined ||
+      invoiceNumber === null ||
+      invoiceNumber === "" ||
+      invoiceNumber === "create" ? (
+        <div className="text-center">
+          <h2 className="text-2xl font-bold">
+            No se ha seleccionado una factura
+          </h2>
+        </div>
+      ) : (
+        <Formik
+          initialValues={initialValues}
+          validationSchema={validationSchema}
+          validateOnMount={true}
+          onSubmit={onSubmit}
+          enableReinitialize={true}
+        >
+          {({ values, handleChange, handleBlur, errors, touched, isValid }) => (
+            <Form className={dynanicFormClassName}>
+              <Select
+                name="conceptID"
+                label="Concepto"
+                options={conceptCatalog}
+                handleChange={handleChange}
+                handleBlur={handleBlur}
+                value={values.conceptID}
+                error={errors.conceptID}
+                touched={touched.conceptID}
+                className={"my-3 col-12"}
+              />
 
-          <Input
-            name="partsNumber"
-            label="Piezas"
-            type={"number"}
-            handleChange={handleChange}
-            handleBlur={handleBlur}
-            value={values.partsNumber}
-            error={errors.partsNumber}
-            touched={touched.partsNumber}
-            className={inputClassName}
-          />
+              <Input
+                name="partsNumber"
+                label="Piezas"
+                type={"number"}
+                handleChange={handleChange}
+                handleBlur={handleBlur}
+                value={values.partsNumber}
+                error={errors.partsNumber}
+                touched={touched.partsNumber}
+                className={inputClassName}
+              />
 
-          <Input
-            name="amount"
-            label="Monto"
-            type={"number"}
-            handleChange={handleChange}
-            handleBlur={handleBlur}
-            value={values.amount}
-            error={errors.amount}
-            touched={touched.amount}
-            className={inputClassName}
-          />
+              <Input
+                name="amount"
+                label="Monto"
+                type={"number"}
+                handleChange={handleChange}
+                handleBlur={handleBlur}
+                value={values.amount}
+                error={errors.amount}
+                touched={touched.amount}
+                className={inputClassName}
+              />
 
-          <Select
-            name="accountID"
-            label="Cuenta"
-            options={accountCatalog}
-            handleChange={handleChange}
-            handleBlur={handleBlur}
-            value={values.accountID}
-            error={errors.accountID}
-            touched={touched.accountID}
-            className={inputClassName}
-          />
+              <Select
+                name="accountID"
+                label="Cuenta"
+                options={accountCatalog}
+                handleChange={handleChange}
+                handleBlur={handleBlur}
+                value={values.accountID}
+                error={errors.accountID}
+                touched={touched.accountID}
+                className={inputClassName}
+              />
 
-          <Select
-            name="serviceTypeID"
-            label="Tipo de Mantenimiento"
-            options={serviceTypeCatalog}
-            handleChange={handleChange}
-            handleBlur={handleBlur}
-            value={values.serviceTypeID}
-            error={errors.serviceTypeID}
-            touched={touched.serviceTypeID}
-            className={inputClassName}
-          />
+              <Select
+                name="serviceTypeID"
+                label="Tipo de Mantenimiento"
+                options={serviceTypeCatalog}
+                handleChange={handleChange}
+                handleBlur={handleBlur}
+                value={values.serviceTypeID}
+                error={errors.serviceTypeID}
+                touched={touched.serviceTypeID}
+                className={inputClassName}
+              />
 
-          <Select
-            name="vendorID"
-            label="Proveedor"
-            options={vendorCatalog}
-            handleChange={handleChange}
-            handleBlur={handleBlur}
-            value={values.vendorID}
-            error={errors.vendorID}
-            touched={touched.vendorID}
-            className={inputClassName}
-          />
+              <Select
+                name="vendorID"
+                label="Proveedor"
+                options={vendorCatalog}
+                handleChange={handleChange}
+                handleBlur={handleBlur}
+                value={values.vendorID}
+                error={errors.vendorID}
+                touched={touched.vendorID}
+                className={inputClassName}
+              />
 
-          <FormControl
-            name="invoiceDate"
-            label="Fecha de factura"
-            error={errors.invoiceDate}
-            touched={touched.invoiceDate}
-            className={inputClassName}
-          >
-            <Calendar
-              name="invoiceDate"
-              value={new Date(values.invoiceDate)}
-              onChange={handleChange}
-              onBlur={handleBlur}
-              showIcon={true}
-              view="month"
-              dateFormat="mm/yy"
-              className="w-full"
-            />
-          </FormControl>
+              <FormControl
+                name="invoiceDate"
+                label="Fecha de factura"
+                error={errors.invoiceDate}
+                touched={touched.invoiceDate}
+                className={inputClassName}
+              >
+                <Calendar
+                  name="invoiceDate"
+                  value={new Date(values.invoiceDate)}
+                  onChange={handleChange}
+                  onBlur={handleBlur}
+                  showIcon={true}
+                  view="month"
+                  dateFormat="mm/yy"
+                  className="w-full"
+                />
+              </FormControl>
 
-          <Button
-            label="Guardar"
-            type="submit"
-            className="p-button-primary flex-1 mx-2"
-            disabled={!isValid || loading}
-          />
-          <Button
-            label="Cancelar"
-            className="p-button-danger flex-1 mx-2"
-            onClick={onReset}
-          />
-        </Form>
+              <Button
+                label="Guardar"
+                type="submit"
+                className="p-button-primary flex-1 mx-2"
+                disabled={!isValid || loading}
+              />
+              <Button
+                label="Cancelar"
+                className="p-button-danger flex-1 mx-2"
+                onClick={onReset}
+              />
+            </Form>
+          )}
+        </Formik>
       )}
-    </Formik>
+    </>
   );
 };
 

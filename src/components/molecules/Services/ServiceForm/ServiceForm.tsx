@@ -1,20 +1,20 @@
 import { Form, Formik } from "formik";
 import { Button } from "primereact/button";
+import { Calendar } from "primereact/calendar";
 import { useCallback, useEffect, useState } from "react";
+import { useDispatch } from "react-redux";
+import { useNavigate } from "react-router-dom";
 import * as Yup from "yup";
 import { IService } from "../../../../models/IService";
 import { getCatalogById } from "../../../../services/catalog.service";
+import { addService } from "../../../../services/services.service";
+import { setNotification } from "../../../../state/notificationSlice";
 import { CatalogType } from "../../../../types/catalog";
 import { FormFieldOptions } from "../../../../types/form";
 import Input from "../../../atoms/Input/InputText";
 import Select from "../../../atoms/Select/Select";
-import { ServiceFormProps } from "./ServiceForm.types";
-import { addService } from "../../../../services/services.service";
-import { useDispatch } from "react-redux";
-import { useNavigate } from "react-router-dom";
-import { setNotification } from "../../../../state/notificationSlice";
 import FormControl from "../../../atoms/inputContainer/inputContainer";
-import { Calendar } from "primereact/calendar";
+import { ServiceFormProps } from "./ServiceForm.types";
 const ServiceForm: React.FC<ServiceFormProps> = ({
   invoiceNumber,
   getDetails,
@@ -88,23 +88,39 @@ const ServiceForm: React.FC<ServiceFormProps> = ({
       invoiceNumber === "create"
     ) {
       await addService(values)
-      .then((res) => {
-        navigate(`/services/${res.id}`);
-      })
-      .finally(() => {
-
-        dispatch(
-          setNotification({
-            message: "Servicio creado correctamente",
-            severity: "success",
-            summary: "Servicio creado",
-          })
-        );
-        setLoading(false);
-      });
+        .then((res) => {
+          console.log(res);
+          navigate(`/services/${res.id}`);
+          dispatch(
+            setNotification({
+              message: "Servicio creado correctamente",
+              severity: "success",
+              summary: "Servicio creado",
+            })
+          );
+        })
+        .catch((err) => {
+          console.log(err);
+          dispatch(
+            setNotification({
+              message: "Error al crear el servicio",
+              severity: "error",
+              summary: "Error al crear",
+            })
+          );
+        })
+        .finally(() => {
+          setLoading(false);
+        });
     } else {
       setLoading(false);
-
+      dispatch(
+        setNotification({
+          message: "Servicio actualizado correctamente",
+          severity: "info",
+          summary: "Actualizado correctamente",
+        })
+      );
       //TODO: Update service
     }
   };

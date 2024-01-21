@@ -1,3 +1,5 @@
+import { IService } from "../../../../models/IService";
+
 export interface InvoiceTableProps {
-    invoices:any;
+    invoices:IService[];
 }

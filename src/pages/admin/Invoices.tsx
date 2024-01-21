@@ -1,16 +1,27 @@
-import { useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import Layout from "../../components/layout/Layout";
 import InvoiceTable from "../../components/molecules/Admin/InvoiceTable/InvoiceTable";
+import { getAllServices } from "../../services/services.service";
+import { IService } from "../../models/IService";
 
 const InvoicePage = () => {
+  const [invoices, setInvoices] = useState<IService[]>([]);
 
-  const [invoices, setInvoices] = useState([]);
+  const getAllInvoices = useCallback(async () => {
+    const invoices = await getAllServices();
+    console.log(invoices);
+    setInvoices(invoices);
+  }, []);
+
+  useEffect(() => {
+    getAllInvoices();
+  }, [getAllInvoices]);
 
   return (
     <Layout title="Costos">
-     <>
-      <InvoiceTable invoices={invoices} />
-     </>
+      <>
+        <InvoiceTable invoices={invoices} />
+      </>
     </Layout>
   );
 };

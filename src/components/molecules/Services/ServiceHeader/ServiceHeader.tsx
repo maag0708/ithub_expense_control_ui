@@ -7,13 +7,14 @@ const ServiceHeader: React.FC<ServiceHeaderProps> = ({
   createService,
 }) => {
   return (
-    <>
+    <div className="flex flex-column justify-content-center w-full lg:flex-row lg:justify-content-end gap-2">
       <Button
         label="Exportar"
         icon="pi pi-file-pdf"
-        className="p-button-primary"
+        className="p-button-success"
+        raised
+        outlined
         onClick={exportData}
-        text
       />
       <Button
         label="Nuevo Servicio"
@@ -21,7 +22,7 @@ const ServiceHeader: React.FC<ServiceHeaderProps> = ({
         className="p-button-primary"
         onClick={createService}
       />
-    </>
+    </div>
   );
 };
 
