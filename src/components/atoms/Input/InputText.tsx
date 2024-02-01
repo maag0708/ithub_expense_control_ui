@@ -10,7 +10,7 @@ const Input: React.FC<InputProps> = ({
   placeholder,
   type,
   value,
-  disabled,
+  disabled = false,
   required,
   handleChange,
   handleBlur,
@@ -21,6 +21,7 @@ const Input: React.FC<InputProps> = ({
   autoFocus,
   size = "medium",
   className,
+  hint,
 }) => {
   return (
     <div className={`${className} flex flex-column`}>
@@ -34,6 +35,7 @@ const Input: React.FC<InputProps> = ({
           id={name}
           name={name}
           type={type}
+          keyfilter={type == "number" ? "num" : undefined}
           autoFocus={autoFocus}
           required={required}
           placeholder={placeholder}
@@ -51,6 +53,12 @@ const Input: React.FC<InputProps> = ({
           {label ? label : name}
         </label>
       </span>
+      {hint && (
+        <div id={name} className="text-right">
+          <small>{hint}</small>
+        </div>
+      )}
+
       {touched && error ? (
         <span id={name} className="text-left p-error text-sm">
           {error}

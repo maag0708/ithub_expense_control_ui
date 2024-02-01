@@ -2,7 +2,7 @@ import { MenuItem, MenuItemOptions } from "primereact/menuitem";
 
 export interface SidebarItemModel extends MenuItem{
   label?: string;
-  items: MenuItemModel[];
+  items: MenuItemModel[]; 
 }
 
 export interface MenuItemModel {
@@ -11,6 +11,7 @@ export interface MenuItemModel {
   shortcut?: string;
   label: string;
   url: string;
+  visible?: boolean;
   template?:
     | React.ReactNode
     | ((item: MenuItem, options: MenuItemOptions) => React.ReactNode);

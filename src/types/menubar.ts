@@ -5,6 +5,7 @@ export interface MenuBarItem {
   icon?: string;
   badge?: number;
   url: string;
+  visible?: boolean;
   template?:
     | React.ReactNode
     | ((item: MenuItem, options: MenuItemOptions) => React.ReactNode);

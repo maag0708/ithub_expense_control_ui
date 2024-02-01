@@ -9,10 +9,12 @@ import MenuBar from "../atoms/MenuBar/MenuBar";
 import Sidebar from "../atoms/Sidebar/Sidebar";
 import SideBarItemRender from "../molecules/Layout/SideBarRender/SideBarRender";
 import { LayoutProps } from "./Layout.types";
+import { selectRoleName } from "../../state/userSlice";
+import { useSelector } from "react-redux";
 
 const Layout: React.FC<LayoutProps> = ({ header, title, children, back }) => {
   const navigate = useNavigate();
-
+  const role = useSelector(selectRoleName);
   const items: SidebarItemModel[] = [
     {
       label: "Dashboard",
@@ -23,6 +25,7 @@ const Layout: React.FC<LayoutProps> = ({ header, title, children, back }) => {
           icon: "pi pi-fw pi-file",
           template: SideBarItemRender,
           url: "/invoices",
+          visible: role === "ADMIN",
         },
         {
           label: "Servicios",
@@ -40,6 +43,7 @@ const Layout: React.FC<LayoutProps> = ({ header, title, children, back }) => {
       icon: "pi pi-fw pi-file",
       template: SideBarItemRender,
       url: "/invoices",
+      visible: role === "ADMIN",
     },
     {
       label: "Servicios",
@@ -60,7 +64,7 @@ const Layout: React.FC<LayoutProps> = ({ header, title, children, back }) => {
 
   const handleLogout = () => {
     removeLocalStorage("user");
-    window.location.href = "/login";
+    window.location.href = "/";
   };
 
   const end = (
@@ -76,15 +80,14 @@ const Layout: React.FC<LayoutProps> = ({ header, title, children, back }) => {
   );
 
   return (
-    <div className="flex flex-column h-screen w-screen bg-blue-50">
+    <div className="flex flex-column h-screen w-screen bg-blue-50 overflow-auto lg:overflow-hidden">
       <Alert />
       <MenuBar items={itemsMenuBar} start={start} end={end} />
       <div className="flex flex-row h-full w-screen">
-        <Sidebar items={items} />
-        <div className="flex-1 overflow-auto lg:overflow-hidden m-3">
+        <div className="flex-1 overflow-auto lg:overflow-hidden">
           <div className="flex flex-column justify-between h-full max-h-full">
-            <div className="flex flex-column md:flex-row justify-content-between px-0 md:px-5">
-              <div className="w-full flex flex-row justify-content-start align-items-center gap-3 ">
+            <div className="flex flex-column md:flex-row justify-content-between px-5">
+              <div className="w-full flex flex-row justify-content-start align-items-center gap-3 h-4rem">
                 {back && (
                   <Button
                     icon="pi pi-arrow-left"
@@ -101,7 +104,9 @@ const Layout: React.FC<LayoutProps> = ({ header, title, children, back }) => {
                 {header}
               </div>
             </div>
-            <div className="flex flex-column px-0 md:px-5 gap-2 h-full">
+            <div 
+            style={{height: "calc(100% - 4rem)"}}
+            className="mx-4">
               {children}
             </div>
           </div>

@@ -2,7 +2,7 @@ import axios from 'axios';
 
 import { getLocalStorage } from './localStorage';
 
-const backend_url = 'https://dev-authmanager-api.azurewebsites.net/api';
+const backend_url = 'https://dev-expenses-api.azurewebsites.net/api';
 
 const authHeader = () => {
   const user = getLocalStorage('user');

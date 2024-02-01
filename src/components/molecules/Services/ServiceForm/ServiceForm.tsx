@@ -2,26 +2,37 @@ import { Form, Formik } from "formik";
 import { Button } from "primereact/button";
 import { Calendar } from "primereact/calendar";
 import { useCallback, useEffect, useState } from "react";
-import { useDispatch } from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
 import { useNavigate } from "react-router-dom";
 import * as Yup from "yup";
-import { IService } from "../../../../models/IService";
-import { getCatalogById } from "../../../../services/catalog.service";
+import { IServiceForm } from "../../../../models/IService";
+import {
+  getCatalogById,
+  getIdFromCatalog,
+} from "../../../../services/catalog.service";
 import { addService } from "../../../../services/services.service";
 import { setNotification } from "../../../../state/notificationSlice";
+import { selectVendorId } from "../../../../state/userSlice";
 import { CatalogType } from "../../../../types/catalog";
 import { FormFieldOptions } from "../../../../types/form";
 import Input from "../../../atoms/Input/InputText";
 import Select from "../../../atoms/Select/Select";
 import FormControl from "../../../atoms/inputContainer/inputContainer";
 import { ServiceFormProps } from "./ServiceForm.types";
+import { getWeekNumberFromDate } from "../../../../services/date.service";
 const ServiceForm: React.FC<ServiceFormProps> = ({
   invoiceNumber,
   getDetails,
   values,
 }) => {
+  const dispatch = useDispatch();
+  const navigate = useNavigate();
+
+  const vendorID = useSelector(selectVendorId);
   const [loading, setLoading] = useState(false);
   const [weekCatalog, setWeekCatalog] = useState<FormFieldOptions[]>([]);
+  
+
   const [subsidiaryCatalog, setSubsidiaryCatalog] = useState<
     FormFieldOptions[]
   >([]);
@@ -36,24 +47,22 @@ const ServiceForm: React.FC<ServiceFormProps> = ({
     if (!subsidiaries) return;
     setSubsidiaryCatalog(subsidiaries.data);
   }, []);
-  const [initialValues, setInitialValues] = useState<IService>({
-    id: values?.id ?? 0,
+
+  const [initialValues] = useState<IServiceForm>({
     serviceDate: values?.serviceDate
       ? values.serviceDate.toString()
       : new Date().toISOString(),
     invoiceNumber: values?.invoiceNumber ?? "",
     month: values?.month ? values.month.toString() : new Date().toISOString(),
-    weekID: values?.weekID ?? "",
+    weekID: values?.week ?? "Week",
     invoiceDate: values?.invoiceDate
       ? values.invoiceDate.toString()
       : new Date().toISOString(),
     invoice: values?.invoice ?? "",
-    subsidiaryID: values?.subsidiaryID ?? "",
-    vehicleNumer: values?.vehicleNumer ?? "",
+    subsidiaryID: values?.subsidiary ?? "",
+    vehicleNumber: values?.vehicleNumber ?? "",
     status: values?.status ?? false,
   });
-  const dispatch = useDispatch();
-  const navigate = useNavigate();
 
   const validationSchema = Yup.object({
     serviceDate: Yup.date().required("La fecha de servicio es requerida"),
@@ -63,12 +72,8 @@ const ServiceForm: React.FC<ServiceFormProps> = ({
     invoiceDate: Yup.date().required("La fecha de factura es requerida"),
     invoice: Yup.string().required("El folio es requerido"),
     subsidiaryID: Yup.string().required("La sucursal es requerida"),
-    vehicleNumer: Yup.string().required("El numero de vehiculo es requerido"),
+    vehicleNumber: Yup.string().required("El numero de vehiculo es requerido"),
   });
-
-  useEffect(() => {
-    setInitialValues(values ?? initialValues);
-  }, [values, initialValues]);
 
   useEffect(() => {
     getWeekCatalog();
@@ -79,7 +84,7 @@ const ServiceForm: React.FC<ServiceFormProps> = ({
   const dynanicFormClassName = `formgrid grid`;
   const buttonClassName = "flex-1 mx-2";
 
-  const onSubmit = async (values: IService) => {
+  const onSubmit = async (values: IServiceForm) => {
     setLoading(true);
     if (
       invoiceNumber === undefined ||
@@ -87,9 +92,19 @@ const ServiceForm: React.FC<ServiceFormProps> = ({
       invoiceNumber === "" ||
       invoiceNumber === "create"
     ) {
-      await addService(values)
+      const payload = {
+        ...values,
+        weekID: getIdFromCatalog(weekCatalog, values.weekID)?.toString() ?? "",
+        subsidiaryID:
+          getIdFromCatalog(
+            subsidiaryCatalog,
+            values.subsidiaryID
+          )?.toString() ?? "",
+        vendorID: Number(vendorID),
+      };
+      console.log(payload);
+      await addService(payload)
         .then((res) => {
-          console.log(res);
           navigate(`/services/${res.id}`);
           dispatch(
             setNotification({
@@ -100,7 +115,6 @@ const ServiceForm: React.FC<ServiceFormProps> = ({
           );
         })
         .catch((err) => {
-          console.log(err);
           dispatch(
             setNotification({
               message: "Error al crear el servicio",
@@ -133,7 +147,15 @@ const ServiceForm: React.FC<ServiceFormProps> = ({
       validateOnMount={true}
       onSubmit={onSubmit}
     >
-      {({ values, handleChange, handleBlur, errors, touched, isValid }) => (
+      {({
+        values,
+        handleChange,
+        handleBlur,
+        errors,
+        touched,
+        isValid,
+        setFieldValue,
+      }) => (
         <Form className={dynanicFormClassName}>
           <FormControl
             name="serviceDate"
@@ -145,7 +167,16 @@ const ServiceForm: React.FC<ServiceFormProps> = ({
             <Calendar
               name="serviceDate"
               value={new Date(values.serviceDate)}
-              onChange={handleChange}
+              onChange={(e: any) => {
+                handleChange(e);
+                setFieldValue("month", new Date(e.target.value).toISOString());
+                const weekNumber = getWeekNumberFromDate(
+                  new Date(e.target.value)
+                );
+                const week = weekCatalog.find((w) => w.id === weekNumber + 1);
+                setFieldValue("weekID", week?.name);
+                console.log(weekNumber);
+              }}
               onBlur={handleBlur}
               className="w-full"
               showIcon={true}
@@ -174,11 +205,11 @@ const ServiceForm: React.FC<ServiceFormProps> = ({
           >
             <Calendar
               name="month"
+              disabled={true}
               value={new Date(values.month)}
               onChange={handleChange}
               className="w-full"
               onBlur={handleBlur}
-              showIcon={true}
               view="month"
               dateFormat="mm/yy"
             />
@@ -189,6 +220,8 @@ const ServiceForm: React.FC<ServiceFormProps> = ({
             label="Semana"
             options={weekCatalog}
             value={values.weekID}
+            optionLabel="name"
+            optionValue="name"
             handleChange={handleChange}
             handleBlur={handleBlur}
             error={errors.weekID}
@@ -229,6 +262,8 @@ const ServiceForm: React.FC<ServiceFormProps> = ({
           <Select
             name="subsidiaryID"
             label="Sucursal"
+            optionLabel="name"
+            optionValue="name"
             options={subsidiaryCatalog}
             value={values.subsidiaryID}
             handleChange={handleChange}
@@ -239,20 +274,19 @@ const ServiceForm: React.FC<ServiceFormProps> = ({
           />
 
           <Input
-            name="vehicleNumer"
-            label="Numero de vehiculo"
+            name="vehicleNumber"
+            label="Placas"
             type={"text"}
             handleChange={handleChange}
             handleBlur={handleBlur}
-            value={values.vehicleNumer}
-            error={errors.vehicleNumer}
-            touched={touched.vehicleNumer}
+            value={values.vehicleNumber}
+            error={errors.vehicleNumber}
+            touched={touched.vehicleNumber}
             className={inputClassName}
           />
 
           <Button
             label="Guardar"
-            disabled={!isValid}
             loading={loading}
             className={buttonClassName}
             type="submit"

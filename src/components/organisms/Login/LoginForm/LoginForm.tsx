@@ -2,16 +2,18 @@ import { Form, Formik } from "formik";
 import { Button } from "primereact/button";
 import { Card } from "primereact/card";
 import React from "react";
+import { useDispatch } from "react-redux";
 import { useNavigate } from "react-router-dom";
 import * as Yup from "yup";
 import { ILogin } from "../../../../models/ILogin";
 import { login } from "../../../../services/auth.service";
+import { setNotification } from "../../../../state/notificationSlice";
+import { setUser } from "../../../../state/userSlice";
+import { User } from "../../../../types/user";
+import { decodeToken } from "../../../../utils/jwt";
+import { setLocalStorage } from "../../../../utils/localStorage";
 import Input from "../../../atoms/Input/InputText";
 import { LoginFormProps } from "./LoginForm.types";
-import { useDispatch } from "react-redux";
-import { setNotification } from "../../../../state/notificationSlice";
-import { setLocalStorage } from "../../../../utils/localStorage";
-import { decodeToken } from "../../../../utils/jwt";
 
 const LoginForm: React.FC<LoginFormProps> = () => {
   const [loading, setLoading] = React.useState<boolean>(false);
@@ -32,16 +34,9 @@ const LoginForm: React.FC<LoginFormProps> = () => {
     login(values)
       .then((response) => {
         setLoading(true);
-        console.log(response);
-        dispatch(
-          setNotification({
-            message: "Bienvenido",
-            severity: "success",
-            summary: "Login",
-          })
-        );
-        const user = decodeToken(response.token)
+        const user = decodeToken(response.token) as User;
         setLocalStorage("user", user);
+        dispatch(setUser(user));
         navigate("/invoices");
       })
       .catch((error) => {
@@ -52,7 +47,7 @@ const LoginForm: React.FC<LoginFormProps> = () => {
             summary: "Login error",
           })
         );
-        console.log({error});
+        console.log({ error });
       })
       .finally(() => setLoading(false));
   };

@@ -12,8 +12,6 @@ import { FormFieldOptions } from "../../../../types/form";
 import Input from "../../../atoms/Input/InputText";
 import Select from "../../../atoms/Select/Select";
 import { ServiceDetailFormProps } from "./ServiceDetailForm.types";
-import FormControl from "../../../atoms/inputContainer/inputContainer";
-import { Calendar } from "primereact/calendar";
 
 const ServiceDetailForm: React.FC<ServiceDetailFormProps> = ({
   invoiceNumber,
@@ -21,7 +19,11 @@ const ServiceDetailForm: React.FC<ServiceDetailFormProps> = ({
   getServiceDetails,
   onReset,
 }) => {
+  const inputClassName = "my-3 col-12 lg:col-6";
+  const dynanicFormClassName = `formgrid grid`;
+
   const dispatch = useDispatch();
+
   const [loading, setLoading] = useState(false);
 
   const [conceptCatalog, setConceptCatalog] = useState<FormFieldOptions[]>([]);
@@ -32,85 +34,80 @@ const ServiceDetailForm: React.FC<ServiceDetailFormProps> = ({
 
   const [accountCatalog, setAccountCatalog] = useState<FormFieldOptions[]>([]);
   const getAccountCatalog = useCallback(async () => {
-    const weeks = await getCatalogById(CatalogType.ACCOUNT);
-    if (!weeks) return;
-    setAccountCatalog(weeks.data);
+    const accounts = await getCatalogById(CatalogType.ACCOUNT);
+    if (!accounts) return;
+    setAccountCatalog(accounts.data);
   }, []);
 
   const [serviceTypeCatalog, setServiceTypeCatalog] = useState<
     FormFieldOptions[]
   >([]);
   const getServiceTypeCatalog = useCallback(async () => {
-    const weeks = await getCatalogById(CatalogType.SERVICETYPE);
-    if (!weeks) return;
-    setServiceTypeCatalog(weeks.data);
-  }, []);
-
-  const [vendorCatalog, setVendorCatalog] = useState<FormFieldOptions[]>([]);
-  const getVendorCatalog = useCallback(async () => {
-    const weeks = await getCatalogById(CatalogType.VENDOR);
-    if (!weeks) return;
-    setVendorCatalog(weeks.data);
+    const serviceType = await getCatalogById(CatalogType.SERVICETYPE);
+    if (!serviceType) return;
+    setServiceTypeCatalog(serviceType.data);
   }, []);
 
   const [initialValues, setInitualValues] = useState<IServiceDetail>({
     orderID: detail?.orderID ?? "",
-    conceptID: detail?.conceptID ?? "",
+    concept: detail?.concept ?? "",
     partsNumber: detail?.partsNumber ?? "",
     amount: detail?.amount ?? "",
-    accountID: detail?.accountID ?? "",
-    serviceTypeID: detail?.serviceTypeID ?? "",
-    vendorID: detail?.vendorID ?? "",
-    invoiceDate: detail?.invoiceDate
-      ? detail.invoiceDate.toString()
-      : new Date().toISOString(),
+    account: detail?.account ?? "",
+    serviceType: detail?.serviceType ?? "",
   });
 
   const validationSchema = Yup.object({
-    conceptID: Yup.string().required("El concepto es requerido"),
-    //valida que sea mayor a 0
+    concept: Yup.string().required("El concepto es requerido"),
     partsNumber: Yup.number()
-      .required("Las piezas son requeridas")
-      .min(1, "Las piezas deben ser mayor a 1"),
+      .required("La cantidad total son requeridas")
+      .min(1, "La cantidad total deben ser mayor a 1"),
     amount: Yup.number()
-      .required("El monto es requerido")
-      .min(1, "El monto debe ser mayor a 1"),
-    accountID: Yup.string().required("La cuenta es requerida"),
-    serviceTypeID: Yup.string().required(
-      "El tipo de mantenimiento es requerido"
-    ),
-    vendorID: Yup.string().required("El proveedor es requerido"),
-    invoiceDate: Yup.date().required("El mes de factura es requerido"),
+      .required("El precio unitario es requerido")
+      .min(1, "El precio unitario debe ser mayor a 1"),
+    account: Yup.string().required("La cuenta es requerida"),
+    serviceType: Yup.string().required("El tipo de mantenimiento es requerido"),
   });
 
-  const inputClassName = "my-3 col-12 lg:col-6";
-  const dynanicFormClassName = `formgrid grid`;
+  //update initial values when detail changes
+  useEffect(() => {
+    const concept = conceptCatalog.find((c) => c.name === detail?.concept);
+    setInitualValues({
+      orderID: detail?.orderID ?? "",
+      concept: concept?.name.toString() ?? "",
+      partsNumber: detail?.partsNumber ?? "",
+      amount: detail?.amount ?? "",
+      account: detail?.account ?? "",
+      serviceType: detail?.serviceType ?? "",
+    });
+  }, [detail, conceptCatalog]);
 
   useEffect(() => {
     getConceptCatalog();
     getAccountCatalog();
     getServiceTypeCatalog();
-    getVendorCatalog();
-  }, [
-    getConceptCatalog,
-    getAccountCatalog,
-    getServiceTypeCatalog,
-    getVendorCatalog,
-  ]);
-
-  useEffect(() => {
-    setInitualValues(detail ?? initialValues);
-  }, [detail, initialValues]);
+  }, [getConceptCatalog, getAccountCatalog, getServiceTypeCatalog]);
 
   const onSubmit = (values: IServiceDetail) => {
     try {
       setLoading(true);
-      console.log({ invoiceNumber });
-      console.log({ values });
-      values.orderID = invoiceNumber ?? "";
-      addServiceDetail([{ ...values }], values.orderID)
-        .then((response) => {
-          console.log(response);
+
+      const payload = [
+        {
+          ...values,
+          orderID: invoiceNumber,
+          conceptID: conceptCatalog.find((c) => c.name === values.concept)?.id,
+          accountID: accountCatalog.find((c) => c.name === values.account)?.id,
+          serviceTypeID: serviceTypeCatalog.find(
+            (c) => c.name === values.serviceType
+          )?.id,
+        },
+      ];
+
+      console.log(payload);
+
+      addServiceDetail(payload, invoiceNumber ?? "")
+        .then(() => {
           dispatch(
             setNotification({
               message: "Detalle creado correctamente",
@@ -119,11 +116,10 @@ const ServiceDetailForm: React.FC<ServiceDetailFormProps> = ({
             })
           );
         })
-        .catch((error) => {
-          console.log(error);
+        .catch(() => {
           dispatch(
             setNotification({
-              message: "Error al guardar el detalle 2222222222222",
+              message: "Error al guardar el detalle",
               severity: "error",
               summary: "Error al guardar",
             })
@@ -153,7 +149,6 @@ const ServiceDetailForm: React.FC<ServiceDetailFormProps> = ({
       }
 */
     } catch (error) {
-      console.log(error);
       dispatch(
         setNotification({
           message: "Error al guardar el detalle",
@@ -184,23 +179,50 @@ const ServiceDetailForm: React.FC<ServiceDetailFormProps> = ({
           onSubmit={onSubmit}
           enableReinitialize={true}
         >
-          {({ values, handleChange, handleBlur, errors, touched, isValid }) => (
+          {({
+            values,
+            handleChange,
+            handleBlur,
+            errors,
+            touched,
+            isValid,
+            setFieldValue,
+          }) => (
             <Form className={dynanicFormClassName}>
               <Select
-                name="conceptID"
+                name="concept"
                 label="Concepto"
                 options={conceptCatalog}
-                handleChange={handleChange}
+                optionLabel="name"
+                optionValue="name"
+                handleChange={(e: any) => {
+                  handleChange(e);
+                  console.log(e.target.value);
+                  const value = conceptCatalog.find(
+                    (c) => c.name === e.target.value
+                  );
+                  console.log(value);
+                  setFieldValue(
+                    "account",
+                    accountCatalog.find((c) => c.id === value?.accountID)?.name
+                  );
+                  setFieldValue(
+                    "serviceType",
+                    serviceTypeCatalog.find(
+                      (c) => c.id === value?.serviceTypeID
+                    )?.name
+                  );
+                }}
                 handleBlur={handleBlur}
-                value={values.conceptID}
-                error={errors.conceptID}
-                touched={touched.conceptID}
+                value={values.concept}
+                error={errors.concept}
+                touched={touched.concept}
                 className={"my-3 col-12"}
               />
 
               <Input
                 name="partsNumber"
-                label="Piezas"
+                label="Cantidad Total"
                 type={"number"}
                 handleChange={handleChange}
                 handleBlur={handleBlur}
@@ -212,40 +234,48 @@ const ServiceDetailForm: React.FC<ServiceDetailFormProps> = ({
 
               <Input
                 name="amount"
-                label="Monto"
+                label="Precio Unitario"
                 type={"number"}
                 handleChange={handleChange}
-                handleBlur={handleBlur}
+                handleBlur={handleBlur} 
                 value={values.amount}
                 error={errors.amount}
                 touched={touched.amount}
                 className={inputClassName}
+                hint={
+                  Number(values.partsNumber) * Number(values.amount) > 0
+                    ? "El total es: " +
+                      Number(values.partsNumber) * Number(values.amount)
+                    : ""
+                }
               />
 
-              <Select
-                name="accountID"
+              <Input
+                name="account"
                 label="Cuenta"
-                options={accountCatalog}
+                type="text"
+                disabled={true}
                 handleChange={handleChange}
                 handleBlur={handleBlur}
-                value={values.accountID}
-                error={errors.accountID}
-                touched={touched.accountID}
+                value={values.account}
+                error={errors.account}
+                touched={touched.account}
                 className={inputClassName}
               />
 
-              <Select
-                name="serviceTypeID"
+              <Input
+                name="serviceType"
+                type="text"
                 label="Tipo de Mantenimiento"
-                options={serviceTypeCatalog}
+                disabled={true}
                 handleChange={handleChange}
                 handleBlur={handleBlur}
-                value={values.serviceTypeID}
-                error={errors.serviceTypeID}
-                touched={touched.serviceTypeID}
+                value={values.serviceType}
+                error={errors.serviceType}
+                touched={touched.serviceType}
                 className={inputClassName}
               />
-
+              {/* 
               <Select
                 name="vendorID"
                 label="Proveedor"
@@ -256,9 +286,9 @@ const ServiceDetailForm: React.FC<ServiceDetailFormProps> = ({
                 error={errors.vendorID}
                 touched={touched.vendorID}
                 className={inputClassName}
-              />
+              /> */}
 
-              <FormControl
+              {/* <FormControl
                 name="invoiceDate"
                 label="Fecha de factura"
                 error={errors.invoiceDate}
@@ -275,19 +305,20 @@ const ServiceDetailForm: React.FC<ServiceDetailFormProps> = ({
                   dateFormat="mm/yy"
                   className="w-full"
                 />
-              </FormControl>
-
-              <Button
-                label="Guardar"
-                type="submit"
-                className="p-button-primary flex-1 mx-2"
-                disabled={!isValid || loading}
-              />
-              <Button
-                label="Cancelar"
-                className="p-button-danger flex-1 mx-2"
-                onClick={onReset}
-              />
+              </FormControl> */}
+              <div className="flex flex-column md:flex-row justify-content-center align-items-center w-full gap-2">
+                <Button
+                  label="Guardar"
+                  type="submit"
+                  className="p-button-primary w-full mx-2"
+                  disabled={!isValid || loading}
+                />
+                <Button
+                  label="Cancelar"
+                  className="p-button-danger w-full mx-2"
+                  onClick={onReset}
+                />
+              </div>
             </Form>
           )}
         </Formik>

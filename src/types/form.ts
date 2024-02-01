@@ -13,6 +13,8 @@ export interface FormFieldOptions {
   id: number;
   name: string;
   identifier: string;
+  accountID?: number;
+  serviceTypeID?: number;
 }
 
 export interface FormButton {

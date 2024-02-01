@@ -12,6 +12,7 @@ import {
 } from "../../services/services.service";
 import { useDispatch } from "react-redux";
 import { setNotification } from "../../state/notificationSlice";
+import { Button } from "primereact/button";
 
 const ServiceCreatePage = () => {
   const { invoiceNumber } = useParams();
@@ -71,6 +72,16 @@ const ServiceCreatePage = () => {
     console.log(detail);
   };
 
+  const handleCloseService = () => {
+    console.log("Close service");
+    navigate("/services/create");
+    window.location.reload();
+  };
+
+  const handleEditDetail = (detail: IServiceDetail) => {
+    setDetail(detail);
+  }
+
   const CardHeader = ({ icon, text }: { icon: string; text: string }) => (
     <div className="mx-2 flex justify-content-start align-items-center gap-3">
       <i
@@ -82,7 +93,22 @@ const ServiceCreatePage = () => {
   );
 
   return (
-    <Layout title="Crear Servicio" back="/services">
+    <Layout
+      title="Crear Servicio"
+      back="/services"
+      header={
+        <>
+          <div className="flex flex-column align-items-center justify-content-center w-full lg:flex-row lg:justify-content-end gap-2">
+            <Button
+              label="Cerrar"
+              icon="pi pi-times"
+              className="p-button-primary w-full lg:w-auto px-4"
+              onClick={handleCloseService}
+            />
+          </div>
+        </>
+      }
+    >
       <div className="flex flex-column gap-2 h-full overflow-scroll">
         <Accordion
           multiple
@@ -127,7 +153,7 @@ const ServiceCreatePage = () => {
         <ServiceDetailTable
           items={serviceDetails}
           loading={loadingDetail}
-          onEdit={setDetail}
+          onEdit={handleEditDetail}
           onDelete={onDeleteDetail}
         />
       </div>

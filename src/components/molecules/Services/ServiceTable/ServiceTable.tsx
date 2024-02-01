@@ -36,14 +36,16 @@ const ServiceTable: React.FC<ServiceTableProps> = ({
     global: { value: null, matchMode: FilterMatchMode.CONTAINS },
     invoiceNumber: { value: null, matchMode: FilterMatchMode.CONTAINS },
     invoice: { value: null, matchMode: FilterMatchMode.CONTAINS },
-    subsidiaryID: { value: null, matchMode: FilterMatchMode.IN },
+    subsidiary: { value: null, matchMode: FilterMatchMode.IN },
     invoiceDate: { value: null, matchMode: FilterMatchMode.CONTAINS },
     month: { value: null, matchMode: FilterMatchMode.CONTAINS },
     serviceDate: { value: null, matchMode: FilterMatchMode.CONTAINS },
+    vendor: { value: null, matchMode: FilterMatchMode.CONTAINS },
     status: { value: null, matchMode: FilterMatchMode.CONTAINS },
-    vehicleNumer: { value: null, matchMode: FilterMatchMode.CONTAINS },
+    vehicleNumber: { value: null, matchMode: FilterMatchMode.CONTAINS },
     total: { value: null, matchMode: FilterMatchMode.CONTAINS },
-    weekID: { value: null, matchMode: FilterMatchMode.IN },
+    count: { value: null, matchMode: FilterMatchMode.CONTAINS },
+    week: { value: null, matchMode: FilterMatchMode.IN },
   };
 
   const [filters, setFilters] = useState<DataTableFilterMeta>(defaultFilters);
@@ -128,21 +130,7 @@ const ServiceTable: React.FC<ServiceTableProps> = ({
     </div>
   );
 
-  const subsidiaryCell = (rowData: IService) => (
-    <div className="flex justify-content-center align-items-center">
-      {
-        subsidiaryCatalog.find(
-          (item) => item.id === Number(rowData.subsidiaryID)
-        )?.name
-      }
-    </div>
-  );
 
-  const weekCell = (rowData: IService) => (
-    <div className="flex justify-content-center align-items-center">
-      {weekCatalog.find((item) => item.id === Number(rowData.weekID))?.name}
-    </div>
-  );
 
   const headers: TableHeader[] = [
     {
@@ -156,17 +144,16 @@ const ServiceTable: React.FC<ServiceTableProps> = ({
     },
     {
       field: "invoice",
-      header: "Folio",
+      header: "Servicios",
       filter: true,
     },
     {
-      field: "subsidiaryID",
+      field: "subsidiary",
       header: "Sucursal",
-      body: subsidiaryCell,
       filter: true,
       filterConfig: {
         showFilterMatchModes: false,
-        filterField: "subsidiaryID",
+        filterField: "subsidiary",
         filterPlaceholder: "Buscar por catálogo de sucursales",
         filterElementTemplate: subsidiaryCatalogFilter,
       },
@@ -196,7 +183,12 @@ const ServiceTable: React.FC<ServiceTableProps> = ({
       body: booleanCell,
     },
     {
-      field: "vehicleNumer",
+      field: "vendor",
+      header: "Proveedor",
+      filter: true,
+    },
+    {
+      field: "vehicleNumber",
       header: "Placas",
       filter: true,
     },
@@ -206,13 +198,17 @@ const ServiceTable: React.FC<ServiceTableProps> = ({
       filter: true,
     },
     {
-      field: "weekID",
+      field: "count",
+      header: "Total de detalles",
+      filter: true,
+    },
+    {
+      field: "week",
       header: "Semana",
-      body: weekCell,
       filter: true,
       filterConfig: {
         showFilterMatchModes: false,
-        filterField: "weekID",
+        filterField: "week",
         filterPlaceholder: "Buscar por catálogo de semanas",
         filterElementTemplate: weekCatalogFilter,
       },
@@ -229,6 +225,8 @@ const ServiceTable: React.FC<ServiceTableProps> = ({
   return (
     <Table
       data={items}
+      scrollable={true}
+      scrollHeight="calc(100vh - 260px)"
       loading={loading}
       headers={headers}
       filters={filters}

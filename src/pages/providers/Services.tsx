@@ -1,14 +1,17 @@
-import { useEffect, useState } from "react";
+import { useCallback, useState } from "react";
+import { useDispatch } from "react-redux";
 import { useNavigate } from "react-router-dom";
 import Layout from "../../components/layout/Layout";
 import ServiceHeader from "../../components/molecules/Services/ServiceHeader/ServiceHeader";
 import ServiceTable from "../../components/molecules/Services/ServiceTable/ServiceTable";
 import { IService } from "../../models/IService";
-import { getAllServices } from "../../services/services.service";
+import { getAllServicesByDateRange } from "../../services/services.service";
 import { exportToXLSX } from "../../services/xlsx.service";
+import { setNotification } from "../../state/notificationSlice";
 
 const ServicePage = () => {
   const navigate = useNavigate();
+  const dispatch = useDispatch();
   const [loading, setLoading] = useState<boolean>(false);
   const [services, setServices] = useState<IService[]>([]);
 
@@ -27,16 +30,40 @@ const ServicePage = () => {
     navigate(`/services/${data.id}`);
   };
 
-  const getAll = async () => {
-    setLoading(true);
-    const res = await getAllServices().finally(() => setLoading(false));
-    setServices(res);
-    console.log(res);
-  };
+  const getByDateRange = useCallback(
+    async (startDate: string, endDate: string) => {
+      setLoading(true);
+      getAllServicesByDateRange(startDate, endDate)
+        .then((res) => {
+          if (res.length === 0) {
+            dispatch(
+              setNotification({
+                severity: "info",
+                summary: "No se encontraron servicios",
+                message:
+                  "No se encontraron servicios en el rango de fechas seleccionado",
+              })
+            );
+          }
+          setServices(res);
+        })
+        .catch((err) => {
+          console.log(err);
+        })
+        .finally(() => {
+          setLoading(false);
+        });
+    },
+    []
+  );
 
-  useEffect(() => {
-    getAll();
-  }, []);
+  const onDatesChange = (dates: Date[]) => {
+    if (dates && dates.length === 2) {
+      const startDate = dates[0].toISOString().split("T")[0];
+      const endDate = dates[1].toISOString().split("T")[0];
+      getByDateRange(startDate, endDate);
+    }
+  };
 
   return (
     <>
@@ -46,6 +73,7 @@ const ServicePage = () => {
           <ServiceHeader
             exportData={exportData}
             createService={createService}
+            onDatesChange={onDatesChange}
           />
         }
       >

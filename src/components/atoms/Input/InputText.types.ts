@@ -18,4 +18,5 @@ export interface InputProps {
   className?: string;
   required?: boolean;
   autoFocus?: boolean;
+  hint?: string;
 }

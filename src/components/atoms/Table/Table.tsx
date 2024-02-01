@@ -1,7 +1,6 @@
 import { Button } from "primereact/button";
 import { Column } from "primereact/column";
 import { DataTable } from "primereact/datatable";
-import { InputText } from "primereact/inputtext";
 import React, { useEffect, useState } from "react";
 import { TableProps } from "./Table.types";
 
@@ -18,6 +17,10 @@ const Table: React.FC<TableProps> = ({
   setFilters,
   scrollable = false,
   scrollHeight,
+  checkable = false,
+  selectedRows,
+  setSelectedRows,
+  headerTemplate,
 }) => {
   const [globalFilterValue, setGlobalFilterValue] = useState("");
 
@@ -28,7 +31,7 @@ const Table: React.FC<TableProps> = ({
     setFilters(_filters);
     setGlobalFilterValue(value);
   };
-  
+
   const initFilters = () => {
     setFilters(defaultFilters);
     setGlobalFilterValue("");
@@ -53,18 +56,7 @@ const Table: React.FC<TableProps> = ({
           outlined
           onClick={clearFilter}
         />
-       {/**
-        *  <span className="p-input-icon-left">
-          <i className="pi pi-search" />
-
-          <InputText
-            value={globalFilterValue}
-            className="w-full"
-            onChange={onGlobalFilterChange}
-            placeholder="Busqueda global"
-          />
-        </span>
-        */}
+        <>{headerTemplate}</>
       </div>
     );
   };
@@ -89,7 +81,15 @@ const Table: React.FC<TableProps> = ({
         )}
         scrollable={scrollable}
         scrollHeight={scrollHeight}
+        selectionMode={checkable ? "checkbox" : null}
+        selection={selectedRows || []}
+        onSelectionChange={(e: any) =>
+          setSelectedRows && setSelectedRows(e.value)
+        }
       >
+        {checkable && (
+          <Column selectionMode="multiple" headerStyle={{ width: "3rem" }} />
+        )}
         {headers.map((header) => (
           <Column
             key={header.field}

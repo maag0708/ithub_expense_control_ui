@@ -14,4 +14,8 @@ export interface TableProps {
   rowsPerPage?: number[];
   scrollable?: boolean;
   scrollHeight?: string;
+  checkable?: boolean;
+  selectedRows?: any[];
+  setSelectedRows?: (rows: any) => void;
+  headerTemplate?: React.ReactNode;
 }

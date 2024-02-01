@@ -1,22 +1,28 @@
-import React, { useCallback, useEffect, useState } from "react";
-import { InvoiceTableProps } from "./InvoiceTable.types";
-import { DataTableFilterMeta } from "primereact/datatable";
 import { FilterMatchMode } from "primereact/api";
-import { TableHeader } from "../../../../types/table";
-import Table from "../../../atoms/Table/Table";
-import { FormFieldOptions } from "../../../../types/form";
+import { Button } from "primereact/button";
+import { ColumnFilterElementTemplateOptions } from "primereact/column";
+import { DataTableFilterMeta } from "primereact/datatable";
+import { MultiSelectChangeEvent } from "primereact/multiselect";
+import React, { useCallback, useEffect, useState } from "react";
+import { IService } from "../../../../models/IService";
 import { getCatalogById } from "../../../../services/catalog.service";
 import { CatalogType } from "../../../../types/catalog";
-import { ColumnFilterElementTemplateOptions } from "primereact/column";
+import { FormFieldOptions } from "../../../../types/form";
+import { TableHeader } from "../../../../types/table";
 import MultiSelect from "../../../atoms/MultiSelect/MultiSelect";
-import { MultiSelectChangeEvent } from "primereact/multiselect";
-import { IService } from "../../../../models/IService";
-import { Button } from "primereact/button";
+import Table from "../../../atoms/Table/Table";
+import { InvoiceTableProps } from "./InvoiceTable.types";
 
-const InvoiceTable: React.FC<InvoiceTableProps> = ({ invoices }) => {
+const InvoiceTable: React.FC<InvoiceTableProps> = ({
+  invoices,
+  updateInvoiceStatus,
+  loading,
+}) => {
+  const [selectedRows, setSelectedRows] = useState<IService[]>([]);
   const [subsidiaryCatalog, setSubsidiaryCatalog] = useState<
     FormFieldOptions[]
   >([]);
+
   const getSubsidiaryCatalog = useCallback(async () => {
     const subsidiary = await getCatalogById(CatalogType.SUBSIDIARY);
     setSubsidiaryCatalog(subsidiary.data);
@@ -32,18 +38,18 @@ const InvoiceTable: React.FC<InvoiceTableProps> = ({ invoices }) => {
     global: { value: null, matchMode: FilterMatchMode.CONTAINS },
     invoiceNumber: { value: null, matchMode: FilterMatchMode.CONTAINS },
     invoice: { value: null, matchMode: FilterMatchMode.CONTAINS },
-    subsidiaryID: { value: null, matchMode: FilterMatchMode.IN },
+    subsidiary: { value: null, matchMode: FilterMatchMode.IN },
     invoiceDate: { value: null, matchMode: FilterMatchMode.CONTAINS },
     month: { value: null, matchMode: FilterMatchMode.CONTAINS },
     serviceDate: { value: null, matchMode: FilterMatchMode.CONTAINS },
     status: { value: null, matchMode: FilterMatchMode.CONTAINS },
-    vehicleNumer: { value: null, matchMode: FilterMatchMode.CONTAINS },
+    vehicleNumber: { value: null, matchMode: FilterMatchMode.CONTAINS },
     total: { value: null, matchMode: FilterMatchMode.CONTAINS },
-    weekID: { value: null, matchMode: FilterMatchMode.IN },
+    count: { value: null, matchMode: FilterMatchMode.CONTAINS },
+    week: { value: null, matchMode: FilterMatchMode.IN },
   };
 
   const [filters, setFilters] = useState<DataTableFilterMeta>(defaultFilters);
-
   useEffect(() => {
     getSubsidiaryCatalog();
     getWeekCatalog();
@@ -122,22 +128,6 @@ const InvoiceTable: React.FC<InvoiceTableProps> = ({ invoices }) => {
     </div>
   );
 
-  const subsidiaryCell = (rowData: IService) => (
-    <div className="flex justify-content-center align-items-center">
-      {
-        subsidiaryCatalog.find(
-          (item) => item.id === Number(rowData.subsidiaryID)
-        )?.name
-      }
-    </div>
-  );
-
-  const weekCell = (rowData: IService) => (
-    <div className="flex justify-content-center align-items-center">
-      {weekCatalog.find((item) => item.id === Number(rowData.weekID))?.name}
-    </div>
-  );
-
   const headers: TableHeader[] = [
     {
       field: "invoiceNumber",
@@ -154,13 +144,12 @@ const InvoiceTable: React.FC<InvoiceTableProps> = ({ invoices }) => {
       filter: true,
     },
     {
-      field: "subsidiaryID",
+      field: "subsidiary",
       header: "Sucursal",
-      body: subsidiaryCell,
       filter: true,
       filterConfig: {
         showFilterMatchModes: false,
-        filterField: "subsidiaryID",
+        filterField: "subsidiary",
         filterPlaceholder: "Buscar por catálogo de sucursales",
         filterElementTemplate: subsidiaryCatalogFilter,
       },
@@ -190,7 +179,7 @@ const InvoiceTable: React.FC<InvoiceTableProps> = ({ invoices }) => {
       body: booleanCell,
     },
     {
-      field: "vehicleNumer",
+      field: "vehicleNumber",
       header: "Placas",
       filter: true,
     },
@@ -200,13 +189,17 @@ const InvoiceTable: React.FC<InvoiceTableProps> = ({ invoices }) => {
       filter: true,
     },
     {
-      field: "weekID",
+      field: "count",
+      header: "Total de detalles",
+      filter: true,
+    },
+    {
+      field: "week",
       header: "Semana",
-      body: weekCell,
       filter: true,
       filterConfig: {
         showFilterMatchModes: false,
-        filterField: "weekID",
+        filterField: "week",
         filterPlaceholder: "Buscar por catálogo de semanas",
         filterElementTemplate: weekCatalogFilter,
       },
@@ -227,6 +220,28 @@ const InvoiceTable: React.FC<InvoiceTableProps> = ({ invoices }) => {
       setFilters={setFilters}
       defaultFilters={defaultFilters}
       paginator={true}
+      checkable={true}
+      loading={loading}
+      selectedRows={selectedRows}
+      setSelectedRows={setSelectedRows}
+      headerTemplate={
+        <>
+          <Button
+            label="Aprobar"
+            type="button"
+            className="p-button-info"
+            icon="pi pi-check"
+            disabled={selectedRows.length === 0}
+            onClick={() => {
+              setSelectedRows([]);
+              updateInvoiceStatus(
+                selectedRows.map((item: IService) => item.id)
+              );
+            }}
+            outlined
+          />
+        </>
+      }
     />
   );
 };

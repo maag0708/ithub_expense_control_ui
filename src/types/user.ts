@@ -1,4 +1,3 @@
-import { RolePermissions } from './role';
 
 export interface User {
   aud: string;
@@ -10,11 +9,12 @@ export interface User {
   nbf: number;
   prymarysid: string;
   unique_name: string;
+  role: string;
+  vendorID?: string;
 }
 
 export interface UserData {
   user: User | null;
-  role: RolePermissions | null;
 }
 
 export interface UserList {

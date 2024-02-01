@@ -4,7 +4,7 @@ export interface TableHeader {
   field: string;
   header: string;
   filter?: boolean;
-  dataType?: 'text' | 'numeric' | 'date' | string | undefined;
+  dataType?: 'text' | 'numeric' | 'date' | 'checkbox' | string | undefined;
   template?: React.ReactNode;
   filterConfig?: TableFilterOptions;
   body?: (rowData: any) => React.ReactNode;
