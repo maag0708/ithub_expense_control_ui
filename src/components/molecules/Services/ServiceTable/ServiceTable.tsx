@@ -1,26 +1,30 @@
-import React, { useCallback, useEffect, useState } from "react";
-import { ServiceTableProps } from "./ServiceTable.types";
-import { ColumnFilterElementTemplateOptions } from "primereact/column";
-import MultiSelect from "../../../atoms/MultiSelect/MultiSelect";
-import { MultiSelectChangeEvent } from "primereact/multiselect";
-import { TableHeader } from "../../../../types/table";
-import Table from "../../../atoms/Table/Table";
-import { DataTableFilterMeta } from "primereact/datatable";
-import { FilterMatchMode } from "primereact/api";
-import { getCatalogById } from "../../../../services/catalog.service";
-import { FormFieldOptions } from "../../../../types/form";
+import { FilterMatchMode, FilterOperator } from "primereact/api";
 import { Button } from "primereact/button";
+import { ColumnFilterElementTemplateOptions } from "primereact/column";
+import { DataTableFilterMeta } from "primereact/datatable";
+import { MultiSelectChangeEvent } from "primereact/multiselect";
+import { TriStateCheckbox } from "primereact/tristatecheckbox";
+import React, { useCallback, useEffect, useState } from "react";
 import { IService } from "../../../../models/IService";
+import { getCatalogById } from "../../../../services/catalog.service";
 import { CatalogType } from "../../../../types/catalog";
+import { FormFieldOptions } from "../../../../types/form";
+import { TableHeader } from "../../../../types/table";
+import MultiSelect from "../../../atoms/MultiSelect/MultiSelect";
+import Table from "../../../atoms/Table/Table";
+import { ServiceTableProps } from "./ServiceTable.types";
 
 const ServiceTable: React.FC<ServiceTableProps> = ({
   items,
   loading,
+  onDelete,
   onEdit,
 }) => {
+
   const [subsidiaryCatalog, setSubsidiaryCatalog] = useState<
     FormFieldOptions[]
   >([]);
+
   const getSubsidiaryCatalog = useCallback(async () => {
     const subsidiary = await getCatalogById(CatalogType.SUBSIDIARY);
     setSubsidiaryCatalog(subsidiary.data);
@@ -37,11 +41,17 @@ const ServiceTable: React.FC<ServiceTableProps> = ({
     invoiceNumber: { value: null, matchMode: FilterMatchMode.CONTAINS },
     invoice: { value: null, matchMode: FilterMatchMode.CONTAINS },
     subsidiary: { value: null, matchMode: FilterMatchMode.IN },
-    invoiceDate: { value: null, matchMode: FilterMatchMode.CONTAINS },
+    invoiceDate: {
+      operator: FilterOperator.AND,
+      constraints: [{ value: null, matchMode: FilterMatchMode.DATE_IS }],
+    },
     month: { value: null, matchMode: FilterMatchMode.CONTAINS },
-    serviceDate: { value: null, matchMode: FilterMatchMode.CONTAINS },
+    serviceDate: {
+      operator: FilterOperator.AND,
+      constraints: [{ value: null, matchMode: FilterMatchMode.DATE_IS }],
+    },
     vendor: { value: null, matchMode: FilterMatchMode.CONTAINS },
-    status: { value: null, matchMode: FilterMatchMode.CONTAINS },
+    status: { value: null, matchMode: FilterMatchMode.EQUALS },
     vehicleNumber: { value: null, matchMode: FilterMatchMode.CONTAINS },
     total: { value: null, matchMode: FilterMatchMode.CONTAINS },
     count: { value: null, matchMode: FilterMatchMode.CONTAINS },
@@ -79,6 +89,23 @@ const ServiceTable: React.FC<ServiceTableProps> = ({
     />
   );
 
+  const verifiedFilterTemplate = (
+    options: ColumnFilterElementTemplateOptions
+  ) => {
+    return (
+      <div className="flex align-items-center gap-2 w-full">
+        <label htmlFor="verified-filter" className="font-bold">
+          Estatus
+        </label>
+        <TriStateCheckbox
+          id="verified-filter"
+          value={options.value}
+          onChange={(e: any) => options.filterCallback(e.value)}
+        />
+      </div>
+    );
+  };
+
   const suppliedCell = (rowData: IService) => (
     <div className="flex justify-content-evenly gap-2">
       <Button
@@ -94,8 +121,8 @@ const ServiceTable: React.FC<ServiceTableProps> = ({
         className="p-button-danger"
         icon="pi pi-trash"
         disabled={rowData.status}
+        onClick={() => onDelete(rowData)}
         outlined
-        onClick={() => onEdit(rowData)}
       />
     </div>
   );
@@ -109,15 +136,9 @@ const ServiceTable: React.FC<ServiceTableProps> = ({
     </div>
   );
 
-  const invoiceDateCell = (rowData: IService) => (
+  const dateCell = (rowData: any, field:string) => (
     <div className="flex justify-content-center align-items-center">
-      {new Date(rowData.invoiceDate ?? "").toLocaleDateString()}
-    </div>
-  );
-
-  const serviceDateCell = (rowData: IService) => (
-    <div className="flex justify-content-center align-items-center">
-      {new Date(rowData.serviceDate ?? "").toLocaleDateString()}
+      {new Date(rowData[field] ?? "").toLocaleDateString('en-GB')}
     </div>
   );
 
@@ -129,8 +150,6 @@ const ServiceTable: React.FC<ServiceTableProps> = ({
       })}
     </div>
   );
-
-
 
   const headers: TableHeader[] = [
     {
@@ -144,7 +163,7 @@ const ServiceTable: React.FC<ServiceTableProps> = ({
     },
     {
       field: "invoice",
-      header: "Servicios",
+      header: "Folios",
       filter: true,
     },
     {
@@ -160,27 +179,31 @@ const ServiceTable: React.FC<ServiceTableProps> = ({
     },
     {
       field: "invoiceDate",
-      header: "Fecha de factura",
-      body: invoiceDateCell,
-      filter: true,
+      header: "Fecha Factura",
+      body: (rowData: IService) => dateCell(rowData, "invoiceDate"),
     },
     {
       field: "month",
-      header: "Mes de factura",
+      header: "Mes Factura",
       body: monthCell,
-      filter: true,
     },
     {
       field: "serviceDate",
-      header: "Fecha de servicio",
-      body: serviceDateCell,
-      filter: true,
+      header: "Fecha Folio",
+      body: (rowData: IService) => dateCell(rowData, "serviceDate"),
     },
     {
       field: "status",
       header: "Estatus",
+      dataType: "boolean",
       filter: true,
       body: booleanCell,
+      filterConfig: {
+        showFilterMatchModes: false,
+        filterField: "status",
+        filterPlaceholder: "Buscar por catálogo de estatus",
+        filterElementTemplate: verifiedFilterTemplate,
+      },
     },
     {
       field: "vendor",
@@ -218,7 +241,6 @@ const ServiceTable: React.FC<ServiceTableProps> = ({
       header: "Acciones",
       filter: false,
       body: suppliedCell,
-   
     },
   ];
 

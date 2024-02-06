@@ -3,7 +3,9 @@ import { Button } from "primereact/button";
 import { ColumnFilterElementTemplateOptions } from "primereact/column";
 import { DataTableFilterMeta } from "primereact/datatable";
 import { MultiSelectChangeEvent } from "primereact/multiselect";
+import { TriStateCheckbox } from "primereact/tristatecheckbox";
 import React, { useCallback, useEffect, useState } from "react";
+import { useNavigate } from "react-router-dom";
 import { IService } from "../../../../models/IService";
 import { getCatalogById } from "../../../../services/catalog.service";
 import { CatalogType } from "../../../../types/catalog";
@@ -16,8 +18,10 @@ import { InvoiceTableProps } from "./InvoiceTable.types";
 const InvoiceTable: React.FC<InvoiceTableProps> = ({
   invoices,
   updateInvoiceStatus,
+  onDelete,
   loading,
 }) => {
+  const navigate = useNavigate();
   const [selectedRows, setSelectedRows] = useState<IService[]>([]);
   const [subsidiaryCatalog, setSubsidiaryCatalog] = useState<
     FormFieldOptions[]
@@ -79,21 +83,25 @@ const InvoiceTable: React.FC<InvoiceTableProps> = ({
     />
   );
 
+  const onEdit = (data: IService) => {
+    navigate(`/services/${data.id}`);
+  };
+
   const suppliedCell = (rowData: IService) => (
     <div className="flex justify-content-evenly gap-2">
       <Button
         type="button"
         className="p-button-primary"
         icon="pi pi-pencil"
-        disabled={rowData.status}
         outlined
+        onClick={() => onEdit(rowData)}
       />
       <Button
         type="button"
         className="p-button-danger"
         icon="pi pi-trash"
-        disabled={rowData.status}
         outlined
+        onClick={() => onDelete(rowData)}
       />
     </div>
   );
@@ -107,15 +115,9 @@ const InvoiceTable: React.FC<InvoiceTableProps> = ({
     </div>
   );
 
-  const invoiceDateCell = (rowData: IService) => (
+  const dateCell = (rowData: any, field: string) => (
     <div className="flex justify-content-center align-items-center">
-      {new Date(rowData.invoiceDate ?? "").toLocaleDateString()}
-    </div>
-  );
-
-  const serviceDateCell = (rowData: IService) => (
-    <div className="flex justify-content-center align-items-center">
-      {new Date(rowData.serviceDate ?? "").toLocaleDateString()}
+      {new Date(rowData[field] ?? "").toLocaleDateString("en-GB")}
     </div>
   );
 
@@ -127,6 +129,22 @@ const InvoiceTable: React.FC<InvoiceTableProps> = ({
       })}
     </div>
   );
+  const verifiedFilterTemplate = (
+    options: ColumnFilterElementTemplateOptions
+  ) => {
+    return (
+      <div className="flex align-items-center gap-2 w-full">
+        <label htmlFor="verified-filter" className="font-bold">
+          Estatus
+        </label>
+        <TriStateCheckbox
+          id="verified-filter"
+          value={options.value}
+          onChange={(e: any) => options.filterCallback(e.value)}
+        />
+      </div>
+    );
+  };
 
   const headers: TableHeader[] = [
     {
@@ -157,26 +175,34 @@ const InvoiceTable: React.FC<InvoiceTableProps> = ({
     {
       field: "invoiceDate",
       header: "Fecha de factura",
-      body: invoiceDateCell,
-      filter: true,
+      body: (rowData: IService) => dateCell(rowData, "invoiceDate"),
     },
     {
       field: "month",
       header: "Mes de factura",
       body: monthCell,
+    },
+    {
+      field: "vendor",
+      header: "Proveedor",
       filter: true,
     },
     {
       field: "serviceDate",
-      header: "Fecha de servicio",
-      body: serviceDateCell,
-      filter: true,
+      header: "Fecha de Folio",
+      body: (rowData: IService) => dateCell(rowData, "serviceDate"),
     },
     {
       field: "status",
       header: "Estatus",
       filter: true,
       body: booleanCell,
+      filterConfig: {
+        showFilterMatchModes: false,
+        filterField: "status",
+        filterPlaceholder: "Buscar por catálogo de estatus",
+        filterElementTemplate: verifiedFilterTemplate,
+      },
     },
     {
       field: "vehicleNumber",

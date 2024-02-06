@@ -10,7 +10,7 @@ const Calendar: React.FC<CalendarProps> = ({
   handleBlur,
   disabled,
   showIcon,
-  dateFormat,
+  dateFormat = "dd/mm/yy",
   required,
   placeholder,
   className,

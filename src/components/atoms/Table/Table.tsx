@@ -96,6 +96,7 @@ const Table: React.FC<TableProps> = ({
             field={header.field}
             header={header.header}
             filter={header.filter}
+            hidden={header.hidden}
             body={header.body}
             dataType={header.dataType}
             filterElement={header.filterConfig?.filterElementTemplate}

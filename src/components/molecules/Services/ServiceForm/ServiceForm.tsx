@@ -8,8 +8,10 @@ import * as Yup from "yup";
 import { IServiceForm } from "../../../../models/IService";
 import {
   getCatalogById,
+  getFromCatalog,
   getIdFromCatalog,
 } from "../../../../services/catalog.service";
+import { getWeekNumberFromDate } from "../../../../services/date.service";
 import { addService } from "../../../../services/services.service";
 import { setNotification } from "../../../../state/notificationSlice";
 import { selectVendorId } from "../../../../state/userSlice";
@@ -19,7 +21,6 @@ import Input from "../../../atoms/Input/InputText";
 import Select from "../../../atoms/Select/Select";
 import FormControl from "../../../atoms/inputContainer/inputContainer";
 import { ServiceFormProps } from "./ServiceForm.types";
-import { getWeekNumberFromDate } from "../../../../services/date.service";
 const ServiceForm: React.FC<ServiceFormProps> = ({
   invoiceNumber,
   getDetails,
@@ -27,15 +28,15 @@ const ServiceForm: React.FC<ServiceFormProps> = ({
 }) => {
   const dispatch = useDispatch();
   const navigate = useNavigate();
-
   const vendorID = useSelector(selectVendorId);
+  const minDate = new Date();
+  minDate.setDate(minDate.getDate() - 30);
   const [loading, setLoading] = useState(false);
   const [weekCatalog, setWeekCatalog] = useState<FormFieldOptions[]>([]);
-  
-
   const [subsidiaryCatalog, setSubsidiaryCatalog] = useState<
     FormFieldOptions[]
   >([]);
+  const [vendorCatalog, setVendorCatalog] = useState<FormFieldOptions[]>([]);
   const getWeekCatalog = useCallback(async () => {
     const weeks = await getCatalogById(CatalogType.WEEK);
     if (!weeks) return;
@@ -48,13 +49,19 @@ const ServiceForm: React.FC<ServiceFormProps> = ({
     setSubsidiaryCatalog(subsidiaries.data);
   }, []);
 
+  const getVendorCatalog = useCallback(async () => {
+    const vendors = await getCatalogById(CatalogType.VENDOR);
+    if (!vendors) return;
+    setVendorCatalog(vendors.data);
+  }, []);
+
   const [initialValues] = useState<IServiceForm>({
     serviceDate: values?.serviceDate
       ? values.serviceDate.toString()
       : new Date().toISOString(),
     invoiceNumber: values?.invoiceNumber ?? "",
     month: values?.month ? values.month.toString() : new Date().toISOString(),
-    weekID: values?.week ?? "Week",
+    weekID: values?.week ?? "",
     invoiceDate: values?.invoiceDate
       ? values.invoiceDate.toString()
       : new Date().toISOString(),
@@ -62,10 +69,11 @@ const ServiceForm: React.FC<ServiceFormProps> = ({
     subsidiaryID: values?.subsidiary ?? "",
     vehicleNumber: values?.vehicleNumber ?? "",
     status: values?.status ?? false,
+    vendorID: values?.vendor ?? "",
   });
 
   const validationSchema = Yup.object({
-    serviceDate: Yup.date().required("La fecha de servicio es requerida"),
+    serviceDate: Yup.date().required("La fecha de Folio es requerida"),
     invoiceNumber: Yup.string().required("El numero de factura es requerido"),
     month: Yup.date().required("El mes es requerido"),
     weekID: Yup.string().required("La semana es requerida"),
@@ -74,63 +82,93 @@ const ServiceForm: React.FC<ServiceFormProps> = ({
     subsidiaryID: Yup.string().required("La sucursal es requerida"),
     vehicleNumber: Yup.string().required("El numero de vehiculo es requerido"),
   });
-
   useEffect(() => {
     getWeekCatalog();
     getSubsidiaryCatalog();
-  }, [getWeekCatalog, getSubsidiaryCatalog]);
+    getVendorCatalog();
+  }, [getWeekCatalog, getSubsidiaryCatalog, getVendorCatalog]);
 
   const inputClassName = "my-3 col-12 lg:col-6";
   const dynanicFormClassName = `formgrid grid`;
   const buttonClassName = "flex-1 mx-2";
 
   const onSubmit = async (values: IServiceForm) => {
-    setLoading(true);
+    // setLoading(true);
     if (
       invoiceNumber === undefined ||
       invoiceNumber === null ||
       invoiceNumber === "" ||
       invoiceNumber === "create"
     ) {
+      console.log("Creating service");
+      console.log(values);
+      let vendor;
+
+      if (!vendorID) {
+        console.log("VendorID not found");
+        vendor =
+          getIdFromCatalog(vendorCatalog, values.vendorID)?.toString() ?? "";
+        console.log(vendor);
+      } else {
+        vendor =
+          getFromCatalog(vendorCatalog, Number(vendorID))?.id?.toString() ?? "";
+      }
+
+      if (!vendor) return;
+
       const payload = {
         ...values,
+        vendorID: vendor,
         weekID: getIdFromCatalog(weekCatalog, values.weekID)?.toString() ?? "",
         subsidiaryID:
           getIdFromCatalog(
             subsidiaryCatalog,
             values.subsidiaryID
           )?.toString() ?? "",
-        vendorID: Number(vendorID),
       };
       console.log(payload);
+
       await addService(payload)
-        .then((res) => {
-          navigate(`/services/${res.id}`);
-          dispatch(
-            setNotification({
-              message: "Servicio creado correctamente",
-              severity: "success",
-              summary: "Servicio creado",
-            })
-          );
-        })
-        .catch((err) => {
-          dispatch(
-            setNotification({
-              message: "Error al crear el servicio",
-              severity: "error",
-              summary: "Error al crear",
-            })
-          );
-        })
-        .finally(() => {
-          setLoading(false);
-        });
+      .then((res) => {
+        navigate(`/services/${res.id}`);
+        dispatch(
+          setNotification({
+            message: "Folio creado correctamente",
+            severity: "success",
+            summary: "Folio creado",
+          })
+        );
+      })
+      .catch((err) => {
+        dispatch(
+          setNotification({
+            message: "Error al crear el Folio",
+            severity: "error",
+            summary: "Error al crear",
+          })
+        );
+      })
+      .finally(() => {
+        setLoading(false);
+      });
+
     } else {
       setLoading(false);
+
+      const payload = {
+        ...values,
+        vendorID: "2",
+        weekID: getIdFromCatalog(weekCatalog, values.weekID)?.toString() ?? "",
+        subsidiaryID:
+          getIdFromCatalog(
+            subsidiaryCatalog,
+            values.subsidiaryID
+          )?.toString() ?? "",
+      };
+
       dispatch(
         setNotification({
-          message: "Servicio actualizado correctamente",
+          message: "Folio actualizado correctamente",
           severity: "info",
           summary: "Actualizado correctamente",
         })
@@ -159,7 +197,7 @@ const ServiceForm: React.FC<ServiceFormProps> = ({
         <Form className={dynanicFormClassName}>
           <FormControl
             name="serviceDate"
-            label="Fecha de servicio"
+            label="Fecha de Folio"
             error={errors.serviceDate}
             touched={touched.serviceDate}
             className={inputClassName}
@@ -167,6 +205,7 @@ const ServiceForm: React.FC<ServiceFormProps> = ({
             <Calendar
               name="serviceDate"
               value={new Date(values.serviceDate)}
+              minDate={minDate}
               onChange={(e: any) => {
                 handleChange(e);
                 setFieldValue("month", new Date(e.target.value).toISOString());
@@ -175,7 +214,6 @@ const ServiceForm: React.FC<ServiceFormProps> = ({
                 );
                 const week = weekCatalog.find((w) => w.id === weekNumber + 1);
                 setFieldValue("weekID", week?.name);
-                console.log(weekNumber);
               }}
               onBlur={handleBlur}
               className="w-full"
@@ -241,6 +279,7 @@ const ServiceForm: React.FC<ServiceFormProps> = ({
               value={new Date(values.invoiceDate)}
               className="w-full"
               onChange={handleChange}
+              minDate={minDate}
               onBlur={handleBlur}
               showIcon={true}
               dateFormat="dd/mm/yy"
@@ -284,13 +323,29 @@ const ServiceForm: React.FC<ServiceFormProps> = ({
             touched={touched.vehicleNumber}
             className={inputClassName}
           />
+          {!vendorID && (
+            <Select
+              name="vendorID"
+              label="Proveedor"
+              optionValue="name"
+              options={vendorCatalog}
+              value={values.vendorID}
+              handleChange={handleChange}
+              handleBlur={handleBlur}
+              error={errors.vendorID}
+              touched={touched.vendorID}
+              className={inputClassName}
+            />
+          )}
 
-          <Button
-            label="Guardar"
-            loading={loading}
-            className={buttonClassName}
-            type="submit"
-          />
+          <div className="flex flex-column md:flex-row justify-content-center align-items-center w-full gap-2">
+            <Button
+              label="Guardar"
+              loading={loading}
+              className={buttonClassName}
+              type="submit"
+            />
+          </div>
         </Form>
       )}
     </Formik>

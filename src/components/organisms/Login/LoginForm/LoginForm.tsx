@@ -35,8 +35,8 @@ const LoginForm: React.FC<LoginFormProps> = () => {
       .then((response) => {
         setLoading(true);
         const user = decodeToken(response.token) as User;
-        setLocalStorage("user", user);
-        dispatch(setUser(user));
+        setLocalStorage("user", { ...user, token: response.token});
+        dispatch(setUser({ ...user, token: response.token }));
         navigate("/invoices");
       })
       .catch((error) => {

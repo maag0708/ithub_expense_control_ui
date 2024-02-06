@@ -7,6 +7,7 @@ import ServiceDetailTable from "../../components/molecules/Services/ServiceDetai
 import ServiceForm from "../../components/molecules/Services/ServiceForm/ServiceForm";
 import { IService, IServiceDetail } from "../../models/IService";
 import {
+  deleteServiceDetail,
   getServiceById,
   getServiceDetailById,
 } from "../../services/services.service";
@@ -37,9 +38,9 @@ const ServiceCreatePage = () => {
     } catch (e) {
       dispatch(
         setNotification({
-          message: "Error al obtener el servicio",
+          message: "Error al obtener el Folio",
           severity: "error",
-          summary: "Error al obtener el servicio",
+          summary: "Error al obtener el Folio",
         })
       );
       navigate("/services");
@@ -70,6 +71,32 @@ const ServiceCreatePage = () => {
   const onDeleteDetail = async (detail: IServiceDetail) => {
     //TODO: Delete detail
     console.log(detail);
+
+    setLoadingDetail(true);
+    deleteServiceDetail(detail.id)
+      .then(() => {
+        dispatch(
+          setNotification({
+            message: "Detalle eliminado correctamente",
+            severity: "success",
+            summary: "Detalle eliminado",
+          })
+        );
+        getServiceDetails();
+      })
+      .catch(() => {
+        dispatch(
+          setNotification({
+            message: "Error al eliminar el detalle",
+            severity: "error",
+            summary: "Error al eliminar",
+          })
+        );
+      })
+      .finally(() => {
+        setLoadingDetail(false);
+      });
+    
   };
 
   const handleCloseService = () => {
@@ -94,13 +121,13 @@ const ServiceCreatePage = () => {
 
   return (
     <Layout
-      title="Crear Servicio"
+      title="Crear Folio"
       back="/services"
       header={
         <>
           <div className="flex flex-column align-items-center justify-content-center w-full lg:flex-row lg:justify-content-end gap-2">
             <Button
-              label="Cerrar"
+              label="Cerrar Folio"
               icon="pi pi-times"
               className="p-button-primary w-full lg:w-auto px-4"
               onClick={handleCloseService}

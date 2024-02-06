@@ -8,12 +8,14 @@ export interface IService {
   invoice: string;
   subsidiary: string;
   vehicleNumber: string;
+  vendor: string;
   status: boolean;
   total?: number;
   count?: number;
 }
 
 export interface IServiceDetail {
+  id: number;
   orderID: string;
   concept: string;
   partsNumber: string;
@@ -30,6 +32,7 @@ export interface IServiceForm {
   invoiceDate: string;
   invoice: string;
   subsidiaryID: string;
+  vendorID: string;
   vehicleNumber: string;
   status: boolean;
   total?: number;

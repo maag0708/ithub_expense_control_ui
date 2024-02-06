@@ -164,7 +164,7 @@ const ServiceDetailTable: React.FC<ServiceDetailTableProps> = ({
 
   return (
     <Table
-      data={items}
+      data={loading ? [] : items}
       loading={loading}
       headers={headers}
       className="max-h-6rem md:max-h-10rem"

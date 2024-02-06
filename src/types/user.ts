@@ -11,6 +11,7 @@ export interface User {
   unique_name: string;
   role: string;
   vendorID?: string;
+  token: string;
 }
 
 export interface UserData {

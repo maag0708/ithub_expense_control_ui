@@ -21,5 +21,6 @@ export const { setUser } = userSlice.actions;
 
 export const selectUser = (state: RootState) => state.userSlice.user;
 export const selectRoleName = (state: RootState) => state.userSlice.user?.role;
+export const selectUserName = (state: RootState) => state.userSlice.user?.unique_name;
 export const selectVendorId = (state: RootState) => state.userSlice.user?.vendorID;
 export default userSlice.reducer;

@@ -49,6 +49,7 @@ const ServiceDetailForm: React.FC<ServiceDetailFormProps> = ({
   }, []);
 
   const [initialValues, setInitualValues] = useState<IServiceDetail>({
+    id: detail?.id ?? 0,
     orderID: detail?.orderID ?? "",
     concept: detail?.concept ?? "",
     partsNumber: detail?.partsNumber ?? "",
@@ -73,6 +74,7 @@ const ServiceDetailForm: React.FC<ServiceDetailFormProps> = ({
   useEffect(() => {
     const concept = conceptCatalog.find((c) => c.name === detail?.concept);
     setInitualValues({
+      id: detail?.id ?? 0,
       orderID: detail?.orderID ?? "",
       concept: concept?.name.toString() ?? "",
       partsNumber: detail?.partsNumber ?? "",
@@ -237,7 +239,7 @@ const ServiceDetailForm: React.FC<ServiceDetailFormProps> = ({
                 label="Precio Unitario"
                 type={"number"}
                 handleChange={handleChange}
-                handleBlur={handleBlur} 
+                handleBlur={handleBlur}
                 value={values.amount}
                 error={errors.amount}
                 touched={touched.amount}
@@ -275,37 +277,6 @@ const ServiceDetailForm: React.FC<ServiceDetailFormProps> = ({
                 touched={touched.serviceType}
                 className={inputClassName}
               />
-              {/* 
-              <Select
-                name="vendorID"
-                label="Proveedor"
-                options={vendorCatalog}
-                handleChange={handleChange}
-                handleBlur={handleBlur}
-                value={values.vendorID}
-                error={errors.vendorID}
-                touched={touched.vendorID}
-                className={inputClassName}
-              /> */}
-
-              {/* <FormControl
-                name="invoiceDate"
-                label="Fecha de factura"
-                error={errors.invoiceDate}
-                touched={touched.invoiceDate}
-                className={inputClassName}
-              >
-                <Calendar
-                  name="invoiceDate"
-                  value={new Date(values.invoiceDate)}
-                  onChange={handleChange}
-                  onBlur={handleBlur}
-                  showIcon={true}
-                  view="month"
-                  dateFormat="mm/yy"
-                  className="w-full"
-                />
-              </FormControl> */}
               <div className="flex flex-column md:flex-row justify-content-center align-items-center w-full gap-2">
                 <Button
                   label="Guardar"

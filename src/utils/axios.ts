@@ -6,6 +6,8 @@ const backend_url = 'https://dev-expenses-api.azurewebsites.net/api';
 
 const authHeader = () => {
   const user = getLocalStorage('user');
+  console.log({ user });
+
   const appKey = '03C2DB97-DD4D-4998-A6F7-4C88E54199B8'
   if (user && user.token) {
     return { 'FR-APP': appKey,Authorization: 'Bearer ' + user.token };

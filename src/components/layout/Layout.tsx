@@ -1,42 +1,19 @@
 import { Button } from "primereact/button";
 import React from "react";
+import { useSelector } from "react-redux";
 import { useNavigate } from "react-router-dom";
+import { selectRoleName, selectUserName } from "../../state/userSlice";
 import { MenuBarItem } from "../../types/menubar";
-import { SidebarItemModel } from "../../types/sidebar";
 import { removeLocalStorage } from "../../utils/localStorage";
 import Alert from "../atoms/Alert/Alert";
 import MenuBar from "../atoms/MenuBar/MenuBar";
-import Sidebar from "../atoms/Sidebar/Sidebar";
 import SideBarItemRender from "../molecules/Layout/SideBarRender/SideBarRender";
 import { LayoutProps } from "./Layout.types";
-import { selectRoleName } from "../../state/userSlice";
-import { useSelector } from "react-redux";
 
 const Layout: React.FC<LayoutProps> = ({ header, title, children, back }) => {
   const navigate = useNavigate();
   const role = useSelector(selectRoleName);
-  const items: SidebarItemModel[] = [
-    {
-      label: "Dashboard",
-      className: "text-primary bg-blue-50 active",
-      items: [
-        {
-          label: "Facturas",
-          icon: "pi pi-fw pi-file",
-          template: SideBarItemRender,
-          url: "/invoices",
-          visible: role === "ADMIN",
-        },
-        {
-          label: "Servicios",
-          icon: "pi pi-fw pi-send",
-          template: SideBarItemRender,
-          url: "/services",
-        },
-      ],
-    },
-  ];
-
+  const name = useSelector(selectUserName);
   const itemsMenuBar: MenuBarItem[] = [
     {
       label: "Facturas",
@@ -46,7 +23,7 @@ const Layout: React.FC<LayoutProps> = ({ header, title, children, back }) => {
       visible: role === "ADMIN",
     },
     {
-      label: "Servicios",
+      label: "Folios",
       icon: "pi pi-fw pi-send",
       template: SideBarItemRender,
       url: "/services",
@@ -58,7 +35,7 @@ const Layout: React.FC<LayoutProps> = ({ header, title, children, back }) => {
       alt="logo"
       src="http://farmaciasroma.centralus.cloudapp.azure.com:8007/assets/images/roma_logo-1.png"
       height="60"
-      className="mr-2 hidden md:block"
+      className="mx-4 hidden md:block"
     />
   );
 
@@ -68,12 +45,16 @@ const Layout: React.FC<LayoutProps> = ({ header, title, children, back }) => {
   };
 
   const end = (
-    <div className="p-menuitem-content">
+    <div className="flex justify-content-between align-items-center gap-4 mx-4">
+      <div className="card">
+        <p className="text-lg m-2 text-">Bienvenido: {name}</p>
+      </div>
+
       <Button
         icon="pi pi-sign-out"
         raised
         text
-        className="p-button-rounded p-mr-2"
+        className="p-button-rounded"
         onClick={handleLogout}
       />
     </div>
@@ -104,9 +85,7 @@ const Layout: React.FC<LayoutProps> = ({ header, title, children, back }) => {
                 {header}
               </div>
             </div>
-            <div 
-            style={{height: "calc(100% - 4rem)"}}
-            className="mx-4">
+            <div style={{ height: "calc(100% - 4rem)" }} className="mx-4">
               {children}
             </div>
           </div>

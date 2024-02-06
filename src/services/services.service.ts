@@ -1,5 +1,5 @@
 import { IService, IServiceDetail, IServiceForm } from "../models/IService";
-import { get, post, put } from "../utils/axios";
+import { get, post, put, remove } from "../utils/axios";
 
 const BASE_PATH = "/Order";
 
@@ -14,15 +14,10 @@ export const getAllServices = async (): Promise<IService[]> => {
 
 export const getAllServicesByDateRange = async (
   startDate: string,
-  endDate: string
+  endDate: string,
+  vendorID: number
 ): Promise<IService[]> => {
-  return get(`${BASE_PATH}/${startDate}/${endDate}`);
-}
-
-export const getAllServicesByWeek = async (
-  week: number
-): Promise<IService[]> => {
-  return get(`${BASE_PATH}/week?=${week}`);
+  return get(`${BASE_PATH}/${startDate}/${endDate}/${vendorID}`);
 }
 
 export const getServiceById = async (
@@ -52,5 +47,19 @@ export const addServiceDetail = async (
 export const updateServiceDetail = async (
   serviceDetail: IServiceDetail
 ): Promise<IServiceDetail> => {
-  return post(`${BASE_PATH}/detail/${serviceDetail.orderID}`, serviceDetail);
+  return put(`${BASE_PATH}/detail`, serviceDetail);
+};
+
+export const updateService = async (
+  service: IService
+): Promise<IService> => {
+  return put(`${BASE_PATH}`, service);
+}
+
+export const deleteService = async (id: number): Promise<any> => {
+  return remove(`${BASE_PATH}/${id}`);
+};
+
+export const deleteServiceDetail = async (id: number): Promise<any> => {
+  return remove(`${BASE_PATH}/detail/${id}`);
 };

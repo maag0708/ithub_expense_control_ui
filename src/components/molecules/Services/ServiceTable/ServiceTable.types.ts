@@ -4,4 +4,5 @@ export interface ServiceTableProps {
     items: IService[];
     loading: boolean;
     onEdit: (item:IService) => void;
+    onDelete: (item:IService) => void;
 }
