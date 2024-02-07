@@ -16,6 +16,7 @@ const MultiSelect: React.FC<MultiSelectProps> = ({
     <PiMultiSelect
       value={value}
       onChange={onChange}
+      filter
       options={options}
       optionLabel="name"
       optionValue="name"

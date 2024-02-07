@@ -34,6 +34,7 @@ const Select: React.FC<SelectProps> = ({
         <Dropdown
           id={name}
           name={name}
+          filter
           autoFocus={autoFocus}
           required={required}
           placeholder={placeholder}

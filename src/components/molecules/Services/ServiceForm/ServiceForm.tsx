@@ -1,13 +1,15 @@
 import { Form, Formik } from "formik";
 import { Button } from "primereact/button";
 import { Calendar } from "primereact/calendar";
-import { useCallback, useEffect, useState } from "react";
+import { useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { useNavigate } from "react-router-dom";
 import * as Yup from "yup";
+import { useSubsidiaryCatalog } from "../../../catalogs/subsidiaryCatalog";
+import { useVendorCatalog } from "../../../catalogs/vendorCatalog";
+import { useWeekCatalog } from "../../../catalogs/weekCatalog";
 import { IServiceForm } from "../../../../models/IService";
 import {
-  getCatalogById,
   getFromCatalog,
   getIdFromCatalog,
 } from "../../../../services/catalog.service";
@@ -15,15 +17,14 @@ import { getWeekNumberFromDate } from "../../../../services/date.service";
 import { addService } from "../../../../services/services.service";
 import { setNotification } from "../../../../state/notificationSlice";
 import { selectVendorId } from "../../../../state/userSlice";
-import { CatalogType } from "../../../../types/catalog";
-import { FormFieldOptions } from "../../../../types/form";
 import Input from "../../../atoms/Input/InputText";
 import Select from "../../../atoms/Select/Select";
 import FormControl from "../../../atoms/inputContainer/inputContainer";
 import { ServiceFormProps } from "./ServiceForm.types";
+import { useVehicleCatalog } from "../../../catalogs/vehicleCatalog";
+import { buttonClassName, dynanicFormClassName, inputClassName } from "../../../../styles/const";
 const ServiceForm: React.FC<ServiceFormProps> = ({
   invoiceNumber,
-  getDetails,
   values,
 }) => {
   const dispatch = useDispatch();
@@ -32,28 +33,10 @@ const ServiceForm: React.FC<ServiceFormProps> = ({
   const minDate = new Date();
   minDate.setDate(minDate.getDate() - 30);
   const [loading, setLoading] = useState(false);
-  const [weekCatalog, setWeekCatalog] = useState<FormFieldOptions[]>([]);
-  const [subsidiaryCatalog, setSubsidiaryCatalog] = useState<
-    FormFieldOptions[]
-  >([]);
-  const [vendorCatalog, setVendorCatalog] = useState<FormFieldOptions[]>([]);
-  const getWeekCatalog = useCallback(async () => {
-    const weeks = await getCatalogById(CatalogType.WEEK);
-    if (!weeks) return;
-    setWeekCatalog(weeks.data);
-  }, []);
-
-  const getSubsidiaryCatalog = useCallback(async () => {
-    const subsidiaries = await getCatalogById(CatalogType.SUBSIDIARY);
-    if (!subsidiaries) return;
-    setSubsidiaryCatalog(subsidiaries.data);
-  }, []);
-
-  const getVendorCatalog = useCallback(async () => {
-    const vendors = await getCatalogById(CatalogType.VENDOR);
-    if (!vendors) return;
-    setVendorCatalog(vendors.data);
-  }, []);
+  const { vendorCatalog } = useVendorCatalog();
+  const { weekCatalog } = useWeekCatalog();
+  const { subsidiaryCatalog } = useSubsidiaryCatalog();
+  const {vehicleCatalog} = useVehicleCatalog();
 
   const [initialValues] = useState<IServiceForm>({
     serviceDate: values?.serviceDate
@@ -67,7 +50,7 @@ const ServiceForm: React.FC<ServiceFormProps> = ({
       : new Date().toISOString(),
     invoice: values?.invoice ?? "",
     subsidiaryID: values?.subsidiary ?? "",
-    vehicleNumber: values?.vehicleNumber ?? "",
+    vehicleNumberID: values?.vehicleNumber ?? "",
     status: values?.status ?? false,
     vendorID: values?.vendor ?? "",
   });
@@ -80,35 +63,23 @@ const ServiceForm: React.FC<ServiceFormProps> = ({
     invoiceDate: Yup.date().required("La fecha de factura es requerida"),
     invoice: Yup.string().required("El folio es requerido"),
     subsidiaryID: Yup.string().required("La sucursal es requerida"),
-    vehicleNumber: Yup.string().required("El numero de vehiculo es requerido"),
+    vehicleNumberID: Yup.string().required("El numero de vehiculo es requerido"),
   });
-  useEffect(() => {
-    getWeekCatalog();
-    getSubsidiaryCatalog();
-    getVendorCatalog();
-  }, [getWeekCatalog, getSubsidiaryCatalog, getVendorCatalog]);
 
-  const inputClassName = "my-3 col-12 lg:col-6";
-  const dynanicFormClassName = `formgrid grid`;
-  const buttonClassName = "flex-1 mx-2";
 
   const onSubmit = async (values: IServiceForm) => {
-    // setLoading(true);
+    setLoading(true);
     if (
       invoiceNumber === undefined ||
       invoiceNumber === null ||
       invoiceNumber === "" ||
       invoiceNumber === "create"
     ) {
-      console.log("Creating service");
-      console.log(values);
       let vendor;
 
       if (!vendorID) {
-        console.log("VendorID not found");
         vendor =
           getIdFromCatalog(vendorCatalog, values.vendorID)?.toString() ?? "";
-        console.log(vendor);
       } else {
         vendor =
           getFromCatalog(vendorCatalog, Number(vendorID))?.id?.toString() ?? "";
@@ -119,6 +90,7 @@ const ServiceForm: React.FC<ServiceFormProps> = ({
       const payload = {
         ...values,
         vendorID: vendor,
+        vehicleNumberID: getIdFromCatalog(vehicleCatalog, values.vehicleNumberID)?.toString() ?? "",
         weekID: getIdFromCatalog(weekCatalog, values.weekID)?.toString() ?? "",
         subsidiaryID:
           getIdFromCatalog(
@@ -126,45 +98,32 @@ const ServiceForm: React.FC<ServiceFormProps> = ({
             values.subsidiaryID
           )?.toString() ?? "",
       };
-      console.log(payload);
 
       await addService(payload)
-      .then((res) => {
-        navigate(`/services/${res.id}`);
-        dispatch(
-          setNotification({
-            message: "Folio creado correctamente",
-            severity: "success",
-            summary: "Folio creado",
-          })
-        );
-      })
-      .catch((err) => {
-        dispatch(
-          setNotification({
-            message: "Error al crear el Folio",
-            severity: "error",
-            summary: "Error al crear",
-          })
-        );
-      })
-      .finally(() => {
-        setLoading(false);
-      });
-
+        .then((res) => {
+          navigate(`/services/${res.id}`);
+          dispatch(
+            setNotification({
+              message: "Folio creado correctamente",
+              severity: "success",
+              summary: "Folio creado",
+            })
+          );
+        })
+        .catch(() => {
+          dispatch(
+            setNotification({
+              message: "Error al crear el Folio",
+              severity: "error",
+              summary: "Error al crear",
+            })
+          );
+        })
+        .finally(() => {
+          setLoading(false);
+        });
     } else {
       setLoading(false);
-
-      const payload = {
-        ...values,
-        vendorID: "2",
-        weekID: getIdFromCatalog(weekCatalog, values.weekID)?.toString() ?? "",
-        subsidiaryID:
-          getIdFromCatalog(
-            subsidiaryCatalog,
-            values.subsidiaryID
-          )?.toString() ?? "",
-      };
 
       dispatch(
         setNotification({
@@ -173,7 +132,6 @@ const ServiceForm: React.FC<ServiceFormProps> = ({
           summary: "Actualizado correctamente",
         })
       );
-      //TODO: Update service
     }
   };
 
@@ -191,7 +149,6 @@ const ServiceForm: React.FC<ServiceFormProps> = ({
         handleBlur,
         errors,
         touched,
-        isValid,
         setFieldValue,
       }) => (
         <Form className={dynanicFormClassName}>
@@ -312,17 +269,21 @@ const ServiceForm: React.FC<ServiceFormProps> = ({
             className={inputClassName}
           />
 
-          <Input
-            name="vehicleNumber"
+          <Select
+            name="vehicleNumberID"
             label="Placas"
-            type={"text"}
+            optionLabel="name"
+            optionValue="name"
+            options={vehicleCatalog}
+            value={values.vehicleNumberID}
             handleChange={handleChange}
             handleBlur={handleBlur}
-            value={values.vehicleNumber}
-            error={errors.vehicleNumber}
-            touched={touched.vehicleNumber}
+            error={errors.vehicleNumberID}
+            touched={touched.vehicleNumberID}
             className={inputClassName}
           />
+
+       
           {!vendorID && (
             <Select
               name="vendorID"

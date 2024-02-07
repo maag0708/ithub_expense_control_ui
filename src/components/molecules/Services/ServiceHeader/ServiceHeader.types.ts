@@ -1,5 +1,6 @@
 export interface ServiceHeaderProps {
-    exportData: () => void;
+    exportToExcel: () => void;
+    exportToPdf: () => void;
     createService: () => void;
     onDatesChange: (dates: any) => void;
 }

@@ -1,17 +1,18 @@
 import { Form, Formik } from "formik";
 import { Button } from "primereact/button";
-import React, { useCallback, useEffect, useState } from "react";
+import React, { useEffect, useState } from "react";
 import { useDispatch } from "react-redux";
 import * as Yup from "yup";
+import { useAccountCatalog } from "../../../catalogs/accountCatalog";
+import { useConceptCatalog } from "../../../catalogs/conceptCatalog";
+import { useServiceTypeCatalog } from "../../../catalogs/serviceTypeCatalog";
 import { IServiceDetail } from "../../../../models/IService";
-import { getCatalogById } from "../../../../services/catalog.service";
 import { addServiceDetail } from "../../../../services/services.service";
 import { setNotification } from "../../../../state/notificationSlice";
-import { CatalogType } from "../../../../types/catalog";
-import { FormFieldOptions } from "../../../../types/form";
 import Input from "../../../atoms/Input/InputText";
 import Select from "../../../atoms/Select/Select";
 import { ServiceDetailFormProps } from "./ServiceDetailForm.types";
+import { dynanicFormClassName, inputClassName } from "../../../../styles/const";
 
 const ServiceDetailForm: React.FC<ServiceDetailFormProps> = ({
   invoiceNumber,
@@ -19,34 +20,13 @@ const ServiceDetailForm: React.FC<ServiceDetailFormProps> = ({
   getServiceDetails,
   onReset,
 }) => {
-  const inputClassName = "my-3 col-12 lg:col-6";
-  const dynanicFormClassName = `formgrid grid`;
-
   const dispatch = useDispatch();
 
   const [loading, setLoading] = useState(false);
 
-  const [conceptCatalog, setConceptCatalog] = useState<FormFieldOptions[]>([]);
-  const getConceptCatalog = useCallback(async () => {
-    const concept = await getCatalogById(CatalogType.CONCEPT);
-    setConceptCatalog(concept.data);
-  }, []);
-
-  const [accountCatalog, setAccountCatalog] = useState<FormFieldOptions[]>([]);
-  const getAccountCatalog = useCallback(async () => {
-    const accounts = await getCatalogById(CatalogType.ACCOUNT);
-    if (!accounts) return;
-    setAccountCatalog(accounts.data);
-  }, []);
-
-  const [serviceTypeCatalog, setServiceTypeCatalog] = useState<
-    FormFieldOptions[]
-  >([]);
-  const getServiceTypeCatalog = useCallback(async () => {
-    const serviceType = await getCatalogById(CatalogType.SERVICETYPE);
-    if (!serviceType) return;
-    setServiceTypeCatalog(serviceType.data);
-  }, []);
+  const { conceptCatalog } = useConceptCatalog();
+  const { accountCatalog } = useAccountCatalog();
+  const { serviceTypeCatalog } = useServiceTypeCatalog();
 
   const [initialValues, setInitualValues] = useState<IServiceDetail>({
     id: detail?.id ?? 0,
@@ -59,7 +39,6 @@ const ServiceDetailForm: React.FC<ServiceDetailFormProps> = ({
   });
 
   const validationSchema = Yup.object({
-    concept: Yup.string().required("El concepto es requerido"),
     partsNumber: Yup.number()
       .required("La cantidad total son requeridas")
       .min(1, "La cantidad total deben ser mayor a 1"),
@@ -70,7 +49,6 @@ const ServiceDetailForm: React.FC<ServiceDetailFormProps> = ({
     serviceType: Yup.string().required("El tipo de mantenimiento es requerido"),
   });
 
-  //update initial values when detail changes
   useEffect(() => {
     const concept = conceptCatalog.find((c) => c.name === detail?.concept);
     setInitualValues({
@@ -83,12 +61,6 @@ const ServiceDetailForm: React.FC<ServiceDetailFormProps> = ({
       serviceType: detail?.serviceType ?? "",
     });
   }, [detail, conceptCatalog]);
-
-  useEffect(() => {
-    getConceptCatalog();
-    getAccountCatalog();
-    getServiceTypeCatalog();
-  }, [getConceptCatalog, getAccountCatalog, getServiceTypeCatalog]);
 
   const onSubmit = (values: IServiceDetail) => {
     try {
@@ -198,8 +170,7 @@ const ServiceDetailForm: React.FC<ServiceDetailFormProps> = ({
                 optionLabel="name"
                 optionValue="name"
                 handleChange={(e: any) => {
-                  handleChange(e);
-                  console.log(e.target.value);
+                  setFieldValue("concept", e.target.value);
                   const value = conceptCatalog.find(
                     (c) => c.name === e.target.value
                   );

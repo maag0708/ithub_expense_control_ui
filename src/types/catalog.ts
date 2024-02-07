@@ -5,7 +5,8 @@ export enum CatalogType {
     SERVICETYPE = 2,
     SUBSIDIARY = 3,
     VENDOR = 4,
-    WEEK = 5
+    WEEK = 5,
+    VEHICLE = 6
 }
 
 export interface Catalog {

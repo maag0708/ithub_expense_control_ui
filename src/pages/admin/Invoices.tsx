@@ -1,5 +1,5 @@
 import { useCallback, useState } from "react";
-import { useDispatch } from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
 import { useNavigate } from "react-router-dom";
 import Layout from "../../components/layout/Layout";
 import InvoiceTable from "../../components/molecules/Admin/InvoiceTable/InvoiceTable";
@@ -12,19 +12,17 @@ import {
 } from "../../services/services.service";
 import { exportToXLSX } from "../../services/xlsx.service";
 import { setNotification } from "../../state/notificationSlice";
+import PdfTemplate from "../../components/pdf/invoicePdfTemplate";
+import { pdf } from "@react-pdf/renderer";
+import { selectUserName } from "../../state/userSlice";
 
 const InvoicePage = () => {
   const dispatch = useDispatch();
   const navigate = useNavigate();
+  const name = useSelector(selectUserName);
   const [invoices, setInvoices] = useState<IService[]>([]);
   const [loading, setLoading] = useState<boolean>(false);
   const [dates, setDates] = useState<string[]>(["", ""]);
-  const exportData = () => {
-    console.log("Export data");
-    console.log(invoices);
-    exportToXLSX(invoices, "Folios");
-  };
-
   const createService = () => {
     navigate(`/services/create`);
   };
@@ -121,12 +119,50 @@ const InvoicePage = () => {
       });
   };
 
+  const exportToExcel = () => {
+    if (invoices.length === 0) {
+      dispatch(
+        setNotification({
+          severity: "info",
+          summary: "No hay datos",
+          message: "No hay datos para exportar a Excel",
+        })
+      );
+      return;
+    }
+    exportToXLSX(invoices, `Folios_${name}_${new Date().getTime()}`);
+  };
+
+  const exportToPdf = async () => {
+    if (invoices.length === 0) {
+      dispatch(
+        setNotification({
+          severity: "info",
+          summary: "No hay datos",
+          message: "No hay datos para exportar a PDF",
+        })
+      );
+      return;
+    }
+    const blob = await pdf(<PdfTemplate data={invoices} vendor={name??""} />).toBlob();
+    const url = URL.createObjectURL(blob);
+
+    const link = document.createElement("a");
+    link.href = url;
+    link.download = `Folios_${name}${new Date().getTime()}.pdf`;
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+  };
+
+
   return (
     <Layout
       title="Costos"
       header={
         <ServiceHeader
-          exportData={exportData}
+          exportToExcel={exportToExcel}
+          exportToPdf={exportToPdf}
           createService={createService}
           onDatesChange={onDatesChange}
         />

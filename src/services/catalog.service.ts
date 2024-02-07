@@ -17,5 +17,6 @@ export const getIdFromCatalog = (catalog: FormFieldOptions[], value: string) => 
 export const getFromCatalog = (catalog: FormFieldOptions[], id: number) => {
   console.log(catalog, id);
   const item = catalog.find((item) => item.id === id);
+  console.log({item});
   return item;
 }

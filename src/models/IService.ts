@@ -33,7 +33,7 @@ export interface IServiceForm {
   invoice: string;
   subsidiaryID: string;
   vendorID: string;
-  vehicleNumber: string;
+  vehicleNumberID: string;
   status: boolean;
   total?: number;
   count?: number;

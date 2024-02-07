@@ -1,18 +1,19 @@
-import { FilterMatchMode, FilterOperator } from "primereact/api";
+import { FilterMatchMode } from "primereact/api";
 import { Button } from "primereact/button";
 import { ColumnFilterElementTemplateOptions } from "primereact/column";
 import { DataTableFilterMeta } from "primereact/datatable";
 import { MultiSelectChangeEvent } from "primereact/multiselect";
 import { TriStateCheckbox } from "primereact/tristatecheckbox";
-import React, { useCallback, useEffect, useState } from "react";
+import React, { useState } from "react";
 import { IService } from "../../../../models/IService";
-import { getCatalogById } from "../../../../services/catalog.service";
-import { CatalogType } from "../../../../types/catalog";
-import { FormFieldOptions } from "../../../../types/form";
 import { TableHeader } from "../../../../types/table";
 import MultiSelect from "../../../atoms/MultiSelect/MultiSelect";
 import Table from "../../../atoms/Table/Table";
+import { useSubsidiaryCatalog } from "../../../catalogs/subsidiaryCatalog";
+import { useVehicleCatalog } from "../../../catalogs/vehicleCatalog";
+import { useWeekCatalog } from "../../../catalogs/weekCatalog";
 import { ServiceTableProps } from "./ServiceTable.types";
+import { useVendorCatalog } from "../../../catalogs/vendorCatalog";
 
 const ServiceTable: React.FC<ServiceTableProps> = ({
   items,
@@ -20,91 +21,29 @@ const ServiceTable: React.FC<ServiceTableProps> = ({
   onDelete,
   onEdit,
 }) => {
-
-  const [subsidiaryCatalog, setSubsidiaryCatalog] = useState<
-    FormFieldOptions[]
-  >([]);
-
-  const getSubsidiaryCatalog = useCallback(async () => {
-    const subsidiary = await getCatalogById(CatalogType.SUBSIDIARY);
-    setSubsidiaryCatalog(subsidiary.data);
-  }, []);
-
-  const [weekCatalog, setWeekCatalog] = useState<FormFieldOptions[]>([]);
-  const getWeekCatalog = useCallback(async () => {
-    const week = await getCatalogById(CatalogType.WEEK);
-    setWeekCatalog(week.data);
-  }, []);
+  const { subsidiaryCatalog } = useSubsidiaryCatalog();
+  const { weekCatalog } = useWeekCatalog();
+  const { vehicleCatalog } = useVehicleCatalog();
+  const { vendorCatalog } = useVendorCatalog();
 
   const defaultFilters: DataTableFilterMeta = {
     global: { value: null, matchMode: FilterMatchMode.CONTAINS },
     invoiceNumber: { value: null, matchMode: FilterMatchMode.CONTAINS },
     invoice: { value: null, matchMode: FilterMatchMode.CONTAINS },
-    subsidiary: { value: null, matchMode: FilterMatchMode.IN },
-    invoiceDate: {
-      operator: FilterOperator.AND,
-      constraints: [{ value: null, matchMode: FilterMatchMode.DATE_IS }],
-    },
+    invoiceDate: { value: null, matchMode: FilterMatchMode.CONTAINS },
     month: { value: null, matchMode: FilterMatchMode.CONTAINS },
-    serviceDate: {
-      operator: FilterOperator.AND,
-      constraints: [{ value: null, matchMode: FilterMatchMode.DATE_IS }],
-    },
-    vendor: { value: null, matchMode: FilterMatchMode.CONTAINS },
+    serviceDate: { value: null, matchMode: FilterMatchMode.CONTAINS },
     status: { value: null, matchMode: FilterMatchMode.EQUALS },
-    vehicleNumber: { value: null, matchMode: FilterMatchMode.CONTAINS },
     total: { value: null, matchMode: FilterMatchMode.CONTAINS },
     count: { value: null, matchMode: FilterMatchMode.CONTAINS },
+
+    vendor: { value: null, matchMode: FilterMatchMode.IN },
+    subsidiary: { value: null, matchMode: FilterMatchMode.IN },
+    vehicleNumber: { value: null, matchMode: FilterMatchMode.IN },
     week: { value: null, matchMode: FilterMatchMode.IN },
   };
 
   const [filters, setFilters] = useState<DataTableFilterMeta>(defaultFilters);
-
-  useEffect(() => {
-    getSubsidiaryCatalog();
-    getWeekCatalog();
-  }, [getSubsidiaryCatalog, getWeekCatalog]);
-
-  const subsidiaryCatalogFilter = (
-    options: ColumnFilterElementTemplateOptions
-  ) => (
-    <MultiSelect
-      value={options.value}
-      options={subsidiaryCatalog}
-      display="chip"
-      onChange={(e: MultiSelectChangeEvent) => options.filterCallback(e.value)}
-      placeholder="Any"
-      className="p-column-filter"
-    />
-  );
-
-  const weekCatalogFilter = (options: ColumnFilterElementTemplateOptions) => (
-    <MultiSelect
-      value={options.value}
-      options={weekCatalog}
-      display="chip"
-      onChange={(e: MultiSelectChangeEvent) => options.filterCallback(e.value)}
-      placeholder="Any"
-      className="p-column-filter"
-    />
-  );
-
-  const verifiedFilterTemplate = (
-    options: ColumnFilterElementTemplateOptions
-  ) => {
-    return (
-      <div className="flex align-items-center gap-2 w-full">
-        <label htmlFor="verified-filter" className="font-bold">
-          Estatus
-        </label>
-        <TriStateCheckbox
-          id="verified-filter"
-          value={options.value}
-          onChange={(e: any) => options.filterCallback(e.value)}
-        />
-      </div>
-    );
-  };
 
   const suppliedCell = (rowData: IService) => (
     <div className="flex justify-content-evenly gap-2">
@@ -136,9 +75,9 @@ const ServiceTable: React.FC<ServiceTableProps> = ({
     </div>
   );
 
-  const dateCell = (rowData: any, field:string) => (
+  const dateCell = (rowData: any, field: string) => (
     <div className="flex justify-content-center align-items-center">
-      {new Date(rowData[field] ?? "").toLocaleDateString('en-GB')}
+      {new Date(rowData[field] ?? "").toLocaleDateString("en-GB")}
     </div>
   );
 
@@ -151,6 +90,75 @@ const ServiceTable: React.FC<ServiceTableProps> = ({
     </div>
   );
 
+  const subsidiaryCatalogFilter = (
+    options: ColumnFilterElementTemplateOptions
+  ) => (
+    <MultiSelect
+      value={options.value}
+      options={subsidiaryCatalog}
+      display="chip"
+      onChange={(e: MultiSelectChangeEvent) => options.filterCallback(e.value)}
+      placeholder="Any"
+      className="p-column-filter"
+    />
+  );
+
+  const weekCatalogFilter = (options: ColumnFilterElementTemplateOptions) => (
+    <MultiSelect
+      value={options.value}
+      options={weekCatalog}
+      display="chip"
+      onChange={(e: MultiSelectChangeEvent) => options.filterCallback(e.value)}
+      placeholder="Any"
+      className="p-column-filter"
+    />
+  );
+
+  const vehicleNumberFilterTemplate = (
+    options: ColumnFilterElementTemplateOptions
+  ) => {
+    return (
+      <MultiSelect
+        value={options.value}
+        options={vehicleCatalog}
+        display="chip"
+        onChange={(e: MultiSelectChangeEvent) =>
+          options.filterCallback(e.value)
+        }
+        placeholder="Any"
+        className="p-column-filter"
+      />
+    );
+  };
+
+  const vendorCatalogFilter = (options: ColumnFilterElementTemplateOptions) => (
+    <MultiSelect
+      value={options.value}
+      options={vendorCatalog}
+      display="chip"
+      onChange={(e: MultiSelectChangeEvent) => options.filterCallback(e.value)}
+      placeholder="Any"
+      className="p-column-filter"
+    />
+  );
+
+  const verifiedFilterTemplate = (
+    options: ColumnFilterElementTemplateOptions
+  ) => {
+    return (
+      <div className="flex align-items-center gap-2 w-full">
+        <label htmlFor="verified-filter" className="font-bold">
+          Estatus
+        </label>
+        <TriStateCheckbox
+          id="verified-filter"
+          value={options.value}
+          onChange={(e: any) => options.filterCallback(e.value)}
+        />
+      </div>
+    );
+  };
+
   const headers: TableHeader[] = [
     {
       field: "invoiceNumber",
@@ -159,12 +167,16 @@ const ServiceTable: React.FC<ServiceTableProps> = ({
       filterConfig: {
         filterPlaceholder: "Buscar por número de factura",
         isGlobalFilter: true,
+        showFilterMatchModes: false,
       },
     },
     {
       field: "invoice",
       header: "Folios",
       filter: true,
+      filterConfig: {
+        showFilterMatchModes: false,
+      },
     },
     {
       field: "subsidiary",
@@ -181,16 +193,28 @@ const ServiceTable: React.FC<ServiceTableProps> = ({
       field: "invoiceDate",
       header: "Fecha Factura",
       body: (rowData: IService) => dateCell(rowData, "invoiceDate"),
+      filter: true,
+      filterConfig: {
+        showFilterMatchModes: false,
+      },
     },
     {
       field: "month",
       header: "Mes Factura",
       body: monthCell,
+      filter: true,
+      filterConfig: {
+        showFilterMatchModes: false,
+      },
     },
     {
       field: "serviceDate",
       header: "Fecha Folio",
       body: (rowData: IService) => dateCell(rowData, "serviceDate"),
+      filter: true,
+      filterConfig: {
+        showFilterMatchModes: false,
+      },
     },
     {
       field: "status",
@@ -209,21 +233,39 @@ const ServiceTable: React.FC<ServiceTableProps> = ({
       field: "vendor",
       header: "Proveedor",
       filter: true,
+      filterConfig: {
+        showFilterMatchModes: false,
+        filterField: "vendor",
+        filterPlaceholder: "Buscar por catálogo de proveedores",
+        filterElementTemplate: vendorCatalogFilter,
+      },
     },
     {
       field: "vehicleNumber",
       header: "Placas",
       filter: true,
+      filterConfig: {
+        showFilterMatchModes: false,
+        filterField: "vehicleNumber",
+        filterPlaceholder: "Buscar por catálogo de placas",
+        filterElementTemplate: vehicleNumberFilterTemplate,
+      },
     },
     {
       field: "total",
       header: "Total",
       filter: true,
+      filterConfig: {
+        showFilterMatchModes: false,
+      },
     },
     {
       field: "count",
       header: "Total de detalles",
       filter: true,
+      filterConfig: {
+        showFilterMatchModes: false,
+      },
     },
     {
       field: "week",

@@ -5,9 +5,10 @@ import React, { useState } from "react";
 import { ServiceHeaderProps } from "./ServiceHeader.types";
 
 const ServiceHeader: React.FC<ServiceHeaderProps> = ({
-  exportData,
   createService,
   onDatesChange,
+  exportToExcel,
+  exportToPdf
 }) => {
   const [dates, setDates] = useState<Nullable<(Date | null)[]>>(null);
 
@@ -35,12 +36,21 @@ const ServiceHeader: React.FC<ServiceHeaderProps> = ({
       />
 
       <Button
+         label="Exportar pdf"
+         icon="pi pi-file-pdf"
+         className="p-button-danger w-full lg:w-12rem"
+         raised
+         outlined
+         onClick={exportToPdf}
+      />
+
+      <Button
         label="Exportar excel"
         icon="pi pi-file-excel"
         className="p-button-success w-full lg:w-12rem"
         raised
         outlined
-        onClick={exportData}
+        onClick={exportToExcel}
       />
       <Button
         label="Nuevo Folio"

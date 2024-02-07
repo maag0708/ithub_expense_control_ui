@@ -135,8 +135,17 @@ const ServiceDetailTable: React.FC<ServiceDetailTableProps> = ({
         filterElementTemplate: conceptCatalogCatalogFilter,
       },
     },
-    { field: "partsNumber", header: "No. de Partes", filter: true },
-    { field: "amount", header: "Cantidad", filter: true },
+    {
+      field: "partsNumber",
+      header: "No. de Partes",
+      filter: true,
+      filterConfig: {
+        showFilterMatchModes: false,
+      },
+    },
+    { field: "amount", header: "Cantidad", filter: true, filterConfig: {
+      showFilterMatchModes: false,
+    }, },
     {
       field: "account",
       header: "Cuenta",
